@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<phpunit bootstrap="tests/bootstrap.php" colors="true" cacheDirectory=".phpunit.cache">
+    <testsuites>
+        <testsuite name="Unit">
+            <directory>tests/Unit</directory>
+        </testsuite>
+        <testsuite name="Feature">
+            <directory>tests/Feature</directory>
+        </testsuite>
+        <testsuite name="Integration">
+            <directory>tests/Integration</directory>
+        </testsuite>
+    </testsuites>
+
+    <php>
+        <env name="TEST_BASE_URL" value="http://nginx_test"/>
+        <env name="TEST_DB_NAME" value="phpsk_test"/>
+        <env name="TEST_DB_HOST" value="db"/>
+        <env name="TEST_DB_PORT" value="3306"/>
+        <env name="TEST_DB_USER" value="phpsk"/>
+        <env name="TEST_DB_PASS" value="phpsk_dev_password"/>
+    </php>
+</phpunit>
