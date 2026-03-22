@@ -1,0 +1,214 @@
+{
+  "main": {
+    "id": "31ac76c2b1ed543e",
+    "type": "split",
+    "children": [
+      {
+        "id": "c5fa057831c2b416",
+        "type": "tabs",
+        "children": [
+          {
+            "id": "c90e3c05cac5d243",
+            "type": "leaf",
+            "state": {
+              "type": "markdown",
+              "state": {
+                "file": "PHASE1_IMPLEMENTATION_CHECKLIST.md",
+                "mode": "source",
+                "source": false
+              },
+              "icon": "lucide-file",
+              "title": "PHASE1_IMPLEMENTATION_CHECKLIST"
+            }
+          }
+        ]
+      }
+    ],
+    "direction": "vertical"
+  },
+  "left": {
+    "id": "5e6dfe01783a5c4d",
+    "type": "split",
+    "children": [
+      {
+        "id": "e329462195220df7",
+        "type": "tabs",
+        "children": [
+          {
+            "id": "1ef42dc3a04bd099",
+            "type": "leaf",
+            "state": {
+              "type": "file-explorer",
+              "state": {
+                "sortOrder": "alphabetical",
+                "autoReveal": false
+              },
+              "icon": "lucide-folder-closed",
+              "title": "Files"
+            }
+          },
+          {
+            "id": "33c036d3cd66becb",
+            "type": "leaf",
+            "state": {
+              "type": "search",
+              "state": {
+                "query": "",
+                "matchingCase": false,
+                "explainSearch": false,
+                "collapseAll": false,
+                "extraContext": false,
+                "sortOrder": "alphabetical"
+              },
+              "icon": "lucide-search",
+              "title": "Search"
+            }
+          },
+          {
+            "id": "3136ac9be6efbd16",
+            "type": "leaf",
+            "state": {
+              "type": "bookmarks",
+              "state": {},
+              "icon": "lucide-bookmark",
+              "title": "Bookmarks"
+            }
+          }
+        ]
+      }
+    ],
+    "direction": "horizontal",
+    "width": 300
+  },
+  "right": {
+    "id": "29a49543b7af463b",
+    "type": "split",
+    "children": [
+      {
+        "id": "4e19c9e9ab78cc5b",
+        "type": "tabs",
+        "children": [
+          {
+            "id": "8dc3bf8e2a91eaea",
+            "type": "leaf",
+            "state": {
+              "type": "backlink",
+              "state": {
+                "file": "PHASE1_IMPLEMENTATION_CHECKLIST.md",
+                "collapseAll": false,
+                "extraContext": false,
+                "sortOrder": "alphabetical",
+                "showSearch": false,
+                "searchQuery": "",
+                "backlinkCollapsed": false,
+                "unlinkedCollapsed": true
+              },
+              "icon": "links-coming-in",
+              "title": "Backlinks for PHASE1_IMPLEMENTATION_CHECKLIST"
+            }
+          },
+          {
+            "id": "6ee0d0bcd922d11d",
+            "type": "leaf",
+            "state": {
+              "type": "outgoing-link",
+              "state": {
+                "file": "PHASE1_IMPLEMENTATION_CHECKLIST.md",
+                "linksCollapsed": false,
+                "unlinkedCollapsed": true
+              },
+              "icon": "links-going-out",
+              "title": "Outgoing links from PHASE1_IMPLEMENTATION_CHECKLIST"
+            }
+          },
+          {
+            "id": "abd56e74f32035f3",
+            "type": "leaf",
+            "state": {
+              "type": "tag",
+              "state": {
+                "sortOrder": "frequency",
+                "useHierarchy": true,
+                "showSearch": false,
+                "searchQuery": ""
+              },
+              "icon": "lucide-tags",
+              "title": "Tags"
+            }
+          },
+          {
+            "id": "150026beab955487",
+            "type": "leaf",
+            "state": {
+              "type": "all-properties",
+              "state": {
+                "sortOrder": "frequency",
+                "showSearch": false,
+                "searchQuery": ""
+              },
+              "icon": "lucide-archive",
+              "title": "All properties"
+            }
+          },
+          {
+            "id": "af3d24bd2efec0a9",
+            "type": "leaf",
+            "state": {
+              "type": "outline",
+              "state": {
+                "file": "PHASE1_IMPLEMENTATION_CHECKLIST.md",
+                "followCursor": false,
+                "showSearch": false,
+                "searchQuery": ""
+              },
+              "icon": "lucide-list",
+              "title": "Outline of PHASE1_IMPLEMENTATION_CHECKLIST"
+            }
+          }
+        ]
+      }
+    ],
+    "direction": "horizontal",
+    "width": 300,
+    "collapsed": true
+  },
+  "left-ribbon": {
+    "hiddenItems": {
+      "switcher:Open quick switcher": false,
+      "graph:Open graph view": false,
+      "canvas:Create new canvas": false,
+      "daily-notes:Open today's daily note": false,
+      "templates:Insert template": false,
+      "command-palette:Open command palette": false,
+      "bases:Create new base": false
+    }
+  },
+  "active": "c90e3c05cac5d243",
+  "lastOpenFiles": [
+    "public/uploads/menu/menu-20260322225852-558439a770b8.png",
+    "public/spa/index.html",
+    "public/spa/assets/index-DkA1fMSk.js",
+    "public/spa/assets/index-Dia1sGf7.css",
+    "public/spa/assets",
+    "public/uploads/menu/menu-20260322225843-1dbbb1046541.png",
+    "vite.config.js.timestamp-1774220323025-c4bc58747f6ff.mjs",
+    "menuplan/Restaurant.md",
+    "vite.config.js.timestamp-1774218019795-17a47dcab8492.mjs",
+    "node_modules/@rollup/rollup-android-arm-eabi",
+    "node_modules/@esbuild/aix-ppc64",
+    "node_modules/@esbuild/android-arm",
+    "node_modules/fsevents",
+    "public/uploads/menu/menu-20260322221501-cb6ac76d998c.png",
+    "public/uploads/menu/menu-20260322211334-0a9d2b2b928b.png",
+    "public/uploads/menu/menu-20260322211328-62cabd9ca754.png",
+    "public/uploads/menu/menu-item-011.png",
+    "public/uploads/menu/menu-item-010.png",
+    "public/uploads/menu/menu-item-009.png",
+    "public/uploads/menu/menu-item-008.png",
+    "public/uploads/menu/menu-item-007.png",
+    "public/uploads/menu/menu-item-006.png",
+    "PHASE1_IMPLEMENTATION_CHECKLIST.md",
+    "PROJECT_PLAN.md",
+    "menu/Restaurant.md"
+  ]
+}

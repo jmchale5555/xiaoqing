@@ -32,6 +32,11 @@ class HttpClient
         return $this->request('POST', $path, $payload, $headers);
     }
 
+    public function postMultipart(string $path, array $fields = [], array $files = [], array $headers = []): array
+    {
+        return $this->requestMultipart('POST', $path, $fields, $files, $headers);
+    }
+
     public function request(string $method, string $path, ?array $payload = null, array $headers = []): array
     {
         $url = $this->baseUrl . '/' . ltrim($path, '/');
@@ -47,7 +52,7 @@ class HttpClient
         curl_setopt_array($ch, [
             CURLOPT_RETURNTRANSFER => true,
             CURLOPT_CUSTOMREQUEST => strtoupper($method),
-            CURLOPT_HTTPHEADER => $this->buildHeaders($headers, $payload !== null),
+            CURLOPT_HTTPHEADER => $this->buildHeaders($headers, $payload !== null ? 'application/json' : null),
             CURLOPT_COOKIEJAR => $this->cookieFile,
             CURLOPT_COOKIEFILE => $this->cookieFile,
             CURLOPT_HEADERFUNCTION => function ($curl, $headerLine) use (&$responseHeaders) {
@@ -97,6 +102,84 @@ class HttpClient
         ];
     }
 
+    public function requestMultipart(string $method, string $path, array $fields = [], array $files = [], array $headers = []): array
+    {
+        $url = $this->baseUrl . '/' . ltrim($path, '/');
+
+        $ch = curl_init($url);
+        if ($ch === false)
+        {
+            throw new \RuntimeException('Unable to initialize curl');
+        }
+
+        $responseHeaders = [];
+        $postFields = $fields;
+
+        foreach ($files as $key => $filePath)
+        {
+            if (!is_string($filePath) || $filePath === '' || !is_file($filePath))
+            {
+                throw new \RuntimeException('Multipart file path is invalid: ' . (string)$filePath);
+            }
+
+            $mime = mime_content_type($filePath);
+            if (!is_string($mime) || $mime === '')
+            {
+                $mime = 'application/octet-stream';
+            }
+
+            $postFields[$key] = new \CURLFile($filePath, $mime, basename($filePath));
+        }
+
+        curl_setopt_array($ch, [
+            CURLOPT_RETURNTRANSFER => true,
+            CURLOPT_CUSTOMREQUEST => strtoupper($method),
+            CURLOPT_HTTPHEADER => $this->buildHeaders($headers, null),
+            CURLOPT_COOKIEJAR => $this->cookieFile,
+            CURLOPT_COOKIEFILE => $this->cookieFile,
+            CURLOPT_POSTFIELDS => $postFields,
+            CURLOPT_HEADERFUNCTION => function ($curl, $headerLine) use (&$responseHeaders) {
+                $length = strlen($headerLine);
+                $parts = explode(':', $headerLine, 2);
+                if (count($parts) === 2)
+                {
+                    $responseHeaders[strtolower(trim($parts[0]))] = trim($parts[1]);
+                }
+
+                return $length;
+            },
+        ]);
+
+        $body = curl_exec($ch);
+        if ($body === false)
+        {
+            $error = curl_error($ch);
+            curl_close($ch);
+            throw new \RuntimeException('HTTP request failed: ' . $error);
+        }
+
+        $status = curl_getinfo($ch, CURLINFO_HTTP_CODE);
+        curl_close($ch);
+
+        $json = null;
+        $contentType = $responseHeaders['content-type'] ?? '';
+        if (str_contains(strtolower($contentType), 'application/json'))
+        {
+            $decoded = json_decode($body, true);
+            if (is_array($decoded))
+            {
+                $json = $decoded;
+            }
+        }
+
+        return [
+            'status' => $status,
+            'headers' => $responseHeaders,
+            'body' => $body,
+            'json' => $json,
+        ];
+    }
+
     public function csrfToken(): string
     {
         $response = $this->get('/api/auth/csrf');
@@ -110,13 +193,13 @@ class HttpClient
         return $token;
     }
 
-    private function buildHeaders(array $headers, bool $hasPayload): array
+    private function buildHeaders(array $headers, ?string $contentType): array
     {
         $result = ['Accept: application/json'];
 
-        if ($hasPayload)
+        if (is_string($contentType) && $contentType !== '')
         {
-            $result[] = 'Content-Type: application/json';
+            $result[] = 'Content-Type: ' . $contentType;
         }
 
         foreach ($headers as $key => $value)
