@@ -299,6 +299,32 @@ body {
   align-items: center;
 }
 
+.admin-drag-handle {
+  user-select: none;
+  cursor: grab;
+  font-weight: 700;
+  letter-spacing: 0.05em;
+  color: var(--muted);
+  padding: 0.1rem 0.25rem;
+  border-radius: 0.35rem;
+}
+
+.admin-row-draggable {
+  transition: background-color 140ms ease;
+}
+
+.admin-row-draggable:hover {
+  background: rgba(194, 130, 97, 0.08);
+}
+
+.admin-row-dragging {
+  opacity: 0.55;
+}
+
+.admin-row-drop-target {
+  background: rgba(154, 59, 59, 0.12);
+}
+
 .menu-hero {
   border: 1px solid rgba(45, 31, 26, 0.1);
   border-radius: 1.5rem;

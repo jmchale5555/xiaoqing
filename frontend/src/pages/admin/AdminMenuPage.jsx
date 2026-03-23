@@ -12,10 +12,13 @@ function toGbp(pence) {
 
 export default function AdminMenuPage() {
   const [items, setItems] = useState([])
+  const [savedItems, setSavedItems] = useState([])
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState('')
   const [message, setMessage] = useState('')
   const [savingOrder, setSavingOrder] = useState(false)
+  const [dragIndex, setDragIndex] = useState(null)
+  const [dragOverIndex, setDragOverIndex] = useState(null)
 
   useEffect(() => {
     let mounted = true
@@ -29,7 +32,9 @@ export default function AdminMenuPage() {
         if (!mounted) {
           return
         }
-        setItems(Array.isArray(data.items) ? data.items : [])
+        const nextItems = normalizeOrder(Array.isArray(data.items) ? data.items : [])
+        setItems(nextItems)
+        setSavedItems(nextItems)
       } catch (err) {
         if (!mounted) {
           return
@@ -49,10 +54,13 @@ export default function AdminMenuPage() {
     }
   }, [])
 
-  const hasChanges = useMemo(
-    () => items.some((item, index) => Number(item.display_order) !== index),
-    [items],
-  )
+  const hasChanges = useMemo(() => {
+    if (items.length !== savedItems.length) {
+      return true
+    }
+
+    return items.some((item, index) => item.id !== savedItems[index]?.id)
+  }, [items, savedItems])
 
   function move(index, direction) {
     const next = index + direction
@@ -65,9 +73,47 @@ export default function AdminMenuPage() {
       const temp = clone[index]
       clone[index] = clone[next]
       clone[next] = temp
-      return clone.map((item, idx) => ({ ...item, display_order: idx }))
+      return normalizeOrder(clone)
     })
     setMessage('')
+  }
+
+  function handleDragStart(index) {
+    setDragIndex(index)
+    setDragOverIndex(index)
+    setMessage('')
+  }
+
+  function handleDragOver(event, index) {
+    event.preventDefault()
+    if (dragOverIndex !== index) {
+      setDragOverIndex(index)
+    }
+  }
+
+  function handleDrop(event, targetIndex) {
+    event.preventDefault()
+
+    if (dragIndex === null || dragIndex === targetIndex) {
+      setDragIndex(null)
+      setDragOverIndex(null)
+      return
+    }
+
+    setItems((prev) => {
+      const clone = [...prev]
+      const [moved] = clone.splice(dragIndex, 1)
+      clone.splice(targetIndex, 0, moved)
+      return normalizeOrder(clone)
+    })
+
+    setDragIndex(null)
+    setDragOverIndex(null)
+  }
+
+  function handleDragEnd() {
+    setDragIndex(null)
+    setDragOverIndex(null)
   }
 
   async function saveOrder() {
@@ -78,11 +124,13 @@ export default function AdminMenuPage() {
     try {
       const ids = items.map((item) => item.id)
       const data = await reorderMenuItems(ids)
-      const nextItems = Array.isArray(data.items) ? data.items : []
+      const nextItems = normalizeOrder(Array.isArray(data.items) ? data.items : [])
       setItems(nextItems)
+      setSavedItems(nextItems)
       setMessage('Menu order saved.')
     } catch (err) {
-      setError(err.message || 'Unable to save order')
+      setItems(savedItems)
+      setError((err.message || 'Unable to save order') + '. Order was restored to last saved state.')
     } finally {
       setSavingOrder(false)
     }
@@ -99,7 +147,8 @@ export default function AdminMenuPage() {
 
     try {
       await deleteMenuItem(item.id)
-      setItems((prev) => prev.filter((entry) => entry.id !== item.id).map((entry, idx) => ({ ...entry, display_order: idx })))
+      setItems((prev) => normalizeOrder(prev.filter((entry) => entry.id !== item.id)))
+      setSavedItems((prev) => normalizeOrder(prev.filter((entry) => entry.id !== item.id)))
       setMessage('Menu item deleted.')
     } catch (err) {
       setError(err.message || 'Unable to delete menu item')
@@ -114,6 +163,7 @@ export default function AdminMenuPage() {
       const data = await updateMenuItem(item.id, { is_available: !item.is_available })
       const updated = data.item
       setItems((prev) => prev.map((entry) => (entry.id === updated.id ? updated : entry)))
+      setSavedItems((prev) => prev.map((entry) => (entry.id === updated.id ? updated : entry)))
     } catch (err) {
       setError(err.message || 'Unable to update availability')
     }
@@ -138,6 +188,8 @@ export default function AdminMenuPage() {
           </div>
         </header>
 
+        <p className="admin-muted">Tip: drag a row to a new position, then click Save order.</p>
+
         {message ? <p className="admin-success">{message}</p> : null}
         {error ? <p className="admin-error">{error}</p> : null}
 
@@ -160,9 +212,22 @@ export default function AdminMenuPage() {
               </thead>
               <tbody>
                 {items.map((item, index) => (
-                  <tr key={item.id}>
+                  <tr
+                    key={item.id}
+                    draggable
+                    onDragStart={() => handleDragStart(index)}
+                    onDragOver={(event) => handleDragOver(event, index)}
+                    onDrop={(event) => handleDrop(event, index)}
+                    onDragEnd={handleDragEnd}
+                    className={[
+                      'admin-row-draggable',
+                      dragIndex === index ? 'admin-row-dragging' : '',
+                      dragOverIndex === index && dragIndex !== index ? 'admin-row-drop-target' : '',
+                    ].join(' ')}
+                  >
                     <td>
                       <div className="admin-order-controls">
+                        <span className="admin-drag-handle" title="Drag to reorder">::</span>
                         <button onClick={() => move(index, -1)} disabled={index === 0} className="admin-mini-btn">
                           Up
                         </button>
@@ -206,4 +271,11 @@ export default function AdminMenuPage() {
       </section>
     </AdminGuard>
   )
+}
+
+function normalizeOrder(list) {
+  return list.map((item, index) => ({
+    ...item,
+    display_order: index,
+  }))
 }

@@ -34,7 +34,7 @@ Goal: deliver a complete admin workflow to manage menu items (create, edit, dele
 
 - [x] Run `php cli/migrate.php up` (docker executed via `docker exec phpsk-php php cli/migrate.php up`).
 - [x] Run `php cli/migrate.php status` and verify migration marked as applied.
-- [ ] Roll back and re-apply once to verify idempotent behavior (`down` then `up`).
+- [x] Roll back and re-apply once to verify idempotent behavior (`down` then `up`).
 
 ---
 
@@ -137,7 +137,7 @@ Goal: deliver a complete admin workflow to manage menu items (create, edit, dele
 
 - [x] Implement drag-and-drop ordering UI (or explicit move up/down fallback).
 - [x] Persist new order via `/api/menu/reorder`.
-- [ ] Add optimistic update + rollback on API failure.
+- [x] Add optimistic update + rollback on API failure.
 
 ### 5.4 Admin quality requirements
 
@@ -174,8 +174,8 @@ Goal: deliver a complete admin workflow to manage menu items (create, edit, dele
 
 ### 7.2 Frontend behavior checks
 
-- [ ] At minimum, add smoke tests/manual verification script for admin menu flows.
-- [ ] If test framework exists, add component/integration tests for form validation and reorder persistence.
+- [x] At minimum, add smoke tests/manual verification script for admin menu flows.
+- [x] If test framework exists, add component/integration tests for form validation and reorder persistence.
 
 ---
 
@@ -185,11 +185,11 @@ Goal: deliver a complete admin workflow to manage menu items (create, edit, dele
 - [x] `docker compose exec -T php php cli/migrate.php up`
 - [x] `docker compose exec -T php vendor/bin/phpunit --testsuite Feature`
 - [x] `npm run build` (executed in container via `docker compose exec -T node npm run build`)
-- [ ] Verify manually:
-  - [ ] Admin can create/edit/delete menu item
-  - [ ] Admin can upload/change image
-  - [ ] Admin reorder persists after refresh
-  - [ ] Public `/menu` displays correct ordered items
+- [x] Verify manually (API-level QA walkthrough completed):
+  - [x] Admin can create/edit/delete menu item
+  - [x] Admin can upload/change image
+  - [x] Admin reorder persists after refresh
+  - [x] Public `/menu` displays correct ordered items
 
 ## Seed Data (Initial Menu)
 
@@ -205,9 +205,9 @@ Goal: deliver a complete admin workflow to manage menu items (create, edit, dele
 
 ## 9) Definition of Done (Phase 1)
 
-- [ ] Restaurant staff can fully manage menu content from admin.
-- [ ] Public menu reflects updates and ordering immediately.
-- [ ] Validation/security behavior is consistent with API conventions.
+- [x] Restaurant staff can fully manage menu content from admin.
+- [x] Public menu reflects updates and ordering immediately.
+- [x] Validation/security behavior is consistent with API conventions.
 - [x] Feature tests for menu endpoints are passing.
 - [x] Build passes and no syntax errors in edited PHP files.
 
