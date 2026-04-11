@@ -12,6 +12,15 @@ defined('ROOTPATH') or exit('Access Denied');
 
 class MenuController extends ApiController
 {
+    /**
+     * Endpoints:
+     * - GET /api/menu
+     * - GET /api/menu/show/{id}
+     * - POST /api/menu/create
+     * - POST /api/menu/update/{id}
+     * - POST /api/menu/delete/{id}
+     * - POST /api/menu/reorder
+     */
     public function index(): void
     {
         if (($_SERVER['REQUEST_METHOD'] ?? 'GET') !== 'GET')

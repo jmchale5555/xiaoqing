@@ -17,7 +17,10 @@ export default function NavBar() {
             Menu
           </NavLink>
           <NavLink to="/admin/menu" className={({ isActive }) => (isActive ? active : '')}>
-            Admin
+            Admin Menu
+          </NavLink>
+          <NavLink to="/admin/bookings" className={({ isActive }) => (isActive ? active : '')}>
+            Bookings
           </NavLink>
           <NavLink to="/login" className={({ isActive }) => (isActive ? active : '')}>
             Login

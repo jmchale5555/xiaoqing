@@ -8,6 +8,8 @@ import NotFoundPage from './pages/NotFoundPage'
 import AdminMenuPage from './pages/admin/AdminMenuPage'
 import AdminMenuNewPage from './pages/admin/AdminMenuNewPage'
 import AdminMenuEditPage from './pages/admin/AdminMenuEditPage'
+import AdminBookingsPage from './pages/admin/AdminBookingsPage'
+import AdminBookingDetailPage from './pages/admin/AdminBookingDetailPage'
 
 export const router = createBrowserRouter([
   {
@@ -19,6 +21,8 @@ export const router = createBrowserRouter([
       { path: 'admin/menu', element: <AdminMenuPage /> },
       { path: 'admin/menu/new', element: <AdminMenuNewPage /> },
       { path: 'admin/menu/:id/edit', element: <AdminMenuEditPage /> },
+      { path: 'admin/bookings', element: <AdminBookingsPage /> },
+      { path: 'admin/bookings/:id', element: <AdminBookingDetailPage /> },
       { path: 'login', element: <LoginPage /> },
       { path: 'signup', element: <SignupPage /> },
       { path: '*', element: <NotFoundPage /> },

@@ -12,6 +12,15 @@ defined('ROOTPATH') or exit('Access Denied');
 
 class TablesController extends ApiController
 {
+    /**
+     * Endpoints:
+     * - GET /api/tables
+     * - GET /api/tables/show/{id}
+     * - POST /api/tables/create
+     * - POST /api/tables/update/{id}
+     * - POST /api/tables/delete/{id}
+     * - POST /api/tables/reorder
+     */
     public function index(): void
     {
         if (($_SERVER['REQUEST_METHOD'] ?? 'GET') !== 'GET')

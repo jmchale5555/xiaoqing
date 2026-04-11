@@ -185,6 +185,11 @@
   },
   "active": "c90e3c05cac5d243",
   "lastOpenFiles": [
+    "public/uploads/menu/menu-20260323014932-f774a46d23e3.png",
+    "tests/Feature/BookingsApiTest.php",
+    "app/controllers/Api/BookingsController.php",
+    "app/models/Booking.php",
+    "database/migrations/20260323_000400_create_bookings_table.php",
     "public/uploads/menu/menu-20260323013331-1c0ca2d02ee5.png",
     "tests/Feature/TablesApiTest.php",
     "app/controllers/Api/TablesController.php",
@@ -192,11 +197,7 @@
     "database/migrations/20260322_000300_create_tables_table.php",
     "public/spa/index.html",
     "public/spa/assets/index-lfwGsGpA.css",
-    "public/spa/assets/index-DLcnfu9C.js",
-    "public/spa/assets",
     "public/uploads/menu/menu-20260322231038-d1618850be96.png",
-    "vite.config.js.timestamp-1774221037550-293026c395e6d.mjs",
-    "node_modules/jsdom/LICENSE.txt",
     "node_modules/jsdom/README.md",
     "node_modules/@testing-library/user-event/README.md",
     "node_modules/tldts/README.md",
@@ -229,7 +230,6 @@
     "public/uploads/menu/menu-20260322211334-0a9d2b2b928b.png",
     "public/uploads/menu/menu-20260322211328-62cabd9ca754.png",
     "public/uploads/menu/menu-item-011.png",
-    "public/uploads/menu/menu-item-010.png",
-    "public/uploads/menu/menu-item-009.png"
+    "public/uploads/menu/menu-item-010.png"
   ]
 }

@@ -10,6 +10,11 @@ defined('ROOTPATH') or exit('Access Denied');
 
 class UploadsController extends ApiController
 {
+    /**
+     * Endpoints:
+     * - GET /api/uploads
+     * - POST /api/uploads/menu_image
+     */
     public function index(): void
     {
         $this->ok([
