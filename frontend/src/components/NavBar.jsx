@@ -7,7 +7,11 @@ const active = 'nav-active'
 export default function NavBar() {
   const navigate = useNavigate()
   const location = useLocation()
-  const [isAuthenticated, setIsAuthenticated] = useState(false)
+  const [user, setUser] = useState(null)
+
+  const isAuthenticated = Boolean(user)
+  const role = String(user?.role || '')
+  const isStaff = role === 'staff' || role === 'manager'
 
   useEffect(() => {
     let mounted = true
@@ -18,14 +22,14 @@ export default function NavBar() {
           return
         }
 
-        setIsAuthenticated(Boolean(data?.user))
+        setUser(data?.user || null)
       })
       .catch(() => {
         if (!mounted) {
           return
         }
 
-        setIsAuthenticated(false)
+        setUser(null)
       })
 
     return () => {
@@ -40,7 +44,7 @@ export default function NavBar() {
       // no-op: we still clear local auth state and redirect
     }
 
-    setIsAuthenticated(false)
+    setUser(null)
     navigate('/')
   }
 
@@ -57,12 +61,16 @@ export default function NavBar() {
           <NavLink to="/menu" className={({ isActive }) => (isActive ? active : '')}>
             Menu
           </NavLink>
-          <NavLink to="/admin/menu" className={({ isActive }) => (isActive ? active : '')}>
-            Admin Menu
-          </NavLink>
-          <NavLink to="/admin/bookings" className={({ isActive }) => (isActive ? active : '')}>
-            Bookings
-          </NavLink>
+          {isStaff ? (
+            <>
+              <NavLink to="/admin/menu" className={({ isActive }) => (isActive ? active : '')}>
+                Admin Menu
+              </NavLink>
+              <NavLink to="/admin/bookings" className={({ isActive }) => (isActive ? active : '')}>
+                Bookings
+              </NavLink>
+            </>
+          ) : null}
           {isAuthenticated ? (
             <button type="button" onClick={onLogout}>
               Logout

@@ -19,7 +19,7 @@ class BookingsApiTest extends TestCase
         parent::setUp();
 
         $this->staff = new HttpClient(self::baseUrl());
-        $this->signupClient($this->staff, 'booking-staff' . str_replace('.', '', uniqid('', true)) . '@example.com');
+        $this->signupClient($this->staff, 'booking-staff@example.com');
     }
 
     public function testBookingsIndexReturnsArray(): void
@@ -101,6 +101,32 @@ class BookingsApiTest extends TestCase
         ], ['X-CSRF-Token' => $csrf]);
 
         $this->assertSame(401, $withCsrfNoAuth['status']);
+    }
+
+    public function testCreateBookingRequiresStaffRole(): void
+    {
+        $customer = new HttpClient(self::baseUrl());
+        $email = 'booking-customer-' . str_replace('.', '', uniqid('', true)) . '@example.com';
+
+        $signupToken = $customer->csrfToken();
+        $signup = $customer->post('/api/auth/signup', [
+            'name' => 'Booking Customer',
+            'email' => $email,
+            'password' => 'secret123',
+            'confirm' => 'secret123',
+        ], ['X-CSRF-Token' => $signupToken]);
+
+        $this->assertSame(201, $signup['status']);
+        $this->assertSame('customer', $signup['json']['user']['role'] ?? null);
+
+        $token = $customer->csrfToken();
+        $response = $customer->post('/api/bookings/create', [
+            'guest_name' => 'Customer Guest',
+            'party_size' => 2,
+            'booking_start' => '2026-03-25 18:00:00',
+        ], ['X-CSRF-Token' => $token]);
+
+        $this->assertSame(403, $response['status']);
     }
 
     public function testAssignTableRejectsInsufficientSeats(): void
@@ -268,7 +294,20 @@ class BookingsApiTest extends TestCase
             'confirm' => 'secret123',
         ], ['X-CSRF-Token' => $token]);
 
-        $this->assertSame(201, $response['status']);
+        if ($response['status'] === 201)
+        {
+            return;
+        }
+
+        $this->assertSame(422, $response['status']);
+
+        $loginToken = $client->csrfToken();
+        $login = $client->post('/api/auth/login', [
+            'email' => $email,
+            'password' => 'secret123',
+        ], ['X-CSRF-Token' => $loginToken]);
+
+        $this->assertSame(200, $login['status']);
     }
 
     private function createTable(string $name, int $seats): int

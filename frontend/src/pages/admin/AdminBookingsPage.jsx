@@ -2,6 +2,7 @@ import { useEffect, useMemo, useState } from 'react'
 import { Link } from 'react-router-dom'
 import AdminGuard from '../../components/AdminGuard'
 import { assignBookingTable, createBooking, fetchBookingAvailability, fetchBookings } from '../../lib/bookings'
+import { getFriendlyError } from '../../lib/errors'
 import { fetchTables } from '../../lib/tables'
 
 const STATUS_OPTIONS = [
@@ -76,7 +77,7 @@ export default function AdminBookingsPage() {
         if (!mounted) {
           return
         }
-        setError(err.message || 'Unable to load bookings')
+        setError(getFriendlyError(err, 'Could not load bookings. Please refresh and try again.'))
       } finally {
         if (mounted) {
           setLoading(false)
@@ -151,7 +152,7 @@ export default function AdminBookingsPage() {
       })
     } catch (err) {
       setAvailability({ recommended_tables: [], larger_tables: [], busy_table_ids: [] })
-      setAvailabilityError(err.message || 'Unable to load table availability')
+      setAvailabilityError(getFriendlyError(err, 'Could not load table availability. Please try again.'))
     } finally {
       setAvailabilityLoading(false)
     }
@@ -177,7 +178,7 @@ export default function AdminBookingsPage() {
     try {
       await assignBookingTable(bookingId, tableId, { confirmOversized })
       setOversizedConfirm(null)
-      setMessage('Table assignment saved.')
+      setMessage('Table assignment updated successfully.')
 
       const nextBookings = await reloadBookings()
       setBookings(nextBookings)
@@ -196,7 +197,7 @@ export default function AdminBookingsPage() {
           warning: err.payload?.warning || null,
         })
       } else {
-        setError(err.message || 'Unable to assign table')
+        setError(getFriendlyError(err, 'Could not assign a table. Please review details and try again.'))
       }
     } finally {
       setAssigningTableId(null)
@@ -271,7 +272,7 @@ export default function AdminBookingsPage() {
 
       setShowCreateModal(false)
       setCreateOversizedConfirm(null)
-      setMessage('Booking created.')
+      setMessage('Booking created successfully.')
     } catch (err) {
       const hasOversizedError = Boolean(err?.payload?.errors?.confirm_oversized)
 
@@ -280,7 +281,7 @@ export default function AdminBookingsPage() {
           warning: err.payload?.warning || null,
         })
       } else {
-        setCreateError(err.message || 'Unable to create booking')
+        setCreateError(getFriendlyError(err, 'Could not create booking. Please review details and try again.'))
       }
     } finally {
       setCreating(false)

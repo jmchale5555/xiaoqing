@@ -8,6 +8,7 @@ import {
   fetchBookingAvailability,
   updateBooking,
 } from '../../lib/bookings'
+import { getFriendlyError } from '../../lib/errors'
 import { fetchTables } from '../../lib/tables'
 
 const STATUS_OPTIONS = ['pending', 'confirmed', 'seated', 'completed', 'cancelled', 'no_show']
@@ -78,7 +79,7 @@ export default function AdminBookingDetailPage() {
         if (!mounted) {
           return
         }
-        setError(err.message || 'Unable to load booking')
+        setError(getFriendlyError(err, 'Could not load booking details. Please refresh and try again.'))
       } finally {
         if (mounted) {
           setLoading(false)
@@ -153,7 +154,7 @@ export default function AdminBookingDetailPage() {
       })
     } catch (err) {
       setAvailability({ recommended_tables: [], larger_tables: [], busy_table_ids: [] })
-      setAvailabilityError(err.message || 'Unable to load table options')
+      setAvailabilityError(getFriendlyError(err, 'Could not load table options. Please try again.'))
     } finally {
       setAvailabilityLoading(false)
     }
@@ -192,9 +193,9 @@ export default function AdminBookingDetailPage() {
       })
 
       await refreshBooking()
-      setMessage('Booking details saved.')
+      setMessage('Booking changes saved successfully.')
     } catch (err) {
-      setError(err.message || 'Unable to save booking')
+      setError(getFriendlyError(err, 'Could not save booking changes. Please review details and try again.'))
     } finally {
       setSaving(false)
     }
@@ -217,9 +218,9 @@ export default function AdminBookingDetailPage() {
     try {
       await cancelBooking(booking.id)
       await refreshBooking()
-      setMessage('Booking cancelled.')
+      setMessage('Booking cancelled successfully.')
     } catch (err) {
-      setError(err.message || 'Unable to cancel booking')
+      setError(getFriendlyError(err, 'Could not cancel this booking. Please try again.'))
     } finally {
       setSaving(false)
     }
@@ -238,7 +239,7 @@ export default function AdminBookingDetailPage() {
       await assignBookingTable(booking.id, tableId, { confirmOversized })
       setOversizedConfirm(null)
       await refreshBooking()
-      setMessage('Table assignment saved.')
+      setMessage('Table assignment updated successfully.')
     } catch (err) {
       const hasOversizedError = Boolean(err?.payload?.errors?.confirm_oversized)
 
@@ -249,7 +250,7 @@ export default function AdminBookingDetailPage() {
           warning: err.payload?.warning || null,
         })
       } else {
-        setError(err.message || 'Unable to assign table')
+        setError(getFriendlyError(err, 'Could not assign a table. Please review details and try again.'))
       }
     } finally {
       setAssigningTableId(null)

@@ -1,5 +1,6 @@
 import { useMemo, useState } from 'react'
 import { uploadMenuImage } from '../lib/menu'
+import { getFriendlyError } from '../lib/errors'
 
 function penceToDisplay(pence) {
   if (!Number.isFinite(Number(pence))) {
@@ -52,11 +53,10 @@ export default function MenuItemForm({ initialItem, onSubmit, submitLabel = 'Sav
     try {
       const data = await uploadMenuImage(imageFile)
       setForm((prev) => ({ ...prev, image_path: data.image_path || '' }))
-      setImageStatus('Image uploaded.')
+      setImageStatus('Image uploaded successfully.')
       setImageFile(null)
     } catch (err) {
-      const fieldErrors = err.payload?.errors ? Object.values(err.payload.errors) : []
-      setError(fieldErrors[0] || err.message || 'Image upload failed')
+      setError(getFriendlyError(err, 'Could not upload the image. Please check the file and try again.'))
     } finally {
       setUploading(false)
     }
@@ -85,8 +85,7 @@ export default function MenuItemForm({ initialItem, onSubmit, submitLabel = 'Sav
         is_available: form.is_available,
       })
     } catch (err) {
-      const fieldErrors = err.payload?.errors ? Object.values(err.payload.errors) : []
-      setError(fieldErrors[0] || err.message || 'Unable to save menu item')
+      setError(getFriendlyError(err, 'Could not save the menu item. Please review the form and try again.'))
     } finally {
       setSaving(false)
     }

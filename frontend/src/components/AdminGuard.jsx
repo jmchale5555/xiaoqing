@@ -13,7 +13,9 @@ export default function AdminGuard({ children }) {
         if (!mounted) {
           return
         }
-        setStatus(data?.user ? 'ok' : 'unauthenticated')
+        const role = String(data?.user?.role || '')
+        const isStaff = role === 'staff' || role === 'manager'
+        setStatus(data?.user ? (isStaff ? 'ok' : 'forbidden') : 'unauthenticated')
       })
       .catch(() => {
         if (!mounted) {
@@ -39,6 +41,15 @@ export default function AdminGuard({ children }) {
         <Link to="/login" className="admin-cta">
           Go to login
         </Link>
+      </section>
+    )
+  }
+
+  if (status === 'forbidden') {
+    return (
+      <section className="admin-card">
+        <h1 className="admin-title">Staff access required</h1>
+        <p className="admin-muted">Your account is signed in but does not have staff permissions.</p>
       </section>
     )
   }

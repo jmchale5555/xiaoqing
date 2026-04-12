@@ -1,5 +1,6 @@
 import { useEffect, useMemo, useState } from 'react'
 import { fetchMenu } from '../lib/menu'
+import { getFriendlyError } from '../lib/errors'
 
 function formatGbp(pence) {
   const value = Number.isFinite(pence) ? pence : 0
@@ -42,7 +43,7 @@ export default function MenuPage() {
         if (!mounted) {
           return
         }
-        setError(err?.message || 'Unable to load menu right now.')
+        setError(getFriendlyError(err, 'Could not load the menu right now. Please try again shortly.'))
       } finally {
         if (mounted) {
           setLoading(false)

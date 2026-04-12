@@ -177,7 +177,7 @@ describe('AdminBookingsPage oversized assignment flow', () => {
     )
 
     await waitFor(() => {
-      expect(screen.getByText('Booking created.')).toBeInTheDocument()
+      expect(screen.getByText('Booking created successfully.')).toBeInTheDocument()
     })
   })
 

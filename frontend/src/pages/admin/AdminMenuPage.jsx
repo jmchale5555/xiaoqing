@@ -2,6 +2,7 @@ import { useEffect, useMemo, useState } from 'react'
 import { Link } from 'react-router-dom'
 import AdminGuard from '../../components/AdminGuard'
 import { deleteMenuItem, fetchMenu, reorderMenuItems, updateMenuItem } from '../../lib/menu'
+import { getFriendlyError } from '../../lib/errors'
 
 function toGbp(pence) {
   return new Intl.NumberFormat('en-GB', {
@@ -39,7 +40,7 @@ export default function AdminMenuPage() {
         if (!mounted) {
           return
         }
-        setError(err.message || 'Unable to load menu items')
+        setError(getFriendlyError(err, 'Could not load menu items. Please refresh and try again.'))
       } finally {
         if (mounted) {
           setLoading(false)
@@ -127,10 +128,10 @@ export default function AdminMenuPage() {
       const nextItems = normalizeOrder(Array.isArray(data.items) ? data.items : [])
       setItems(nextItems)
       setSavedItems(nextItems)
-      setMessage('Menu order saved.')
+      setMessage('Menu order saved successfully.')
     } catch (err) {
       setItems(savedItems)
-      setError((err.message || 'Unable to save order') + '. Order was restored to last saved state.')
+      setError(getFriendlyError(err, 'Could not save menu order') + '. The previous saved order was restored.')
     } finally {
       setSavingOrder(false)
     }
@@ -149,9 +150,9 @@ export default function AdminMenuPage() {
       await deleteMenuItem(item.id)
       setItems((prev) => normalizeOrder(prev.filter((entry) => entry.id !== item.id)))
       setSavedItems((prev) => normalizeOrder(prev.filter((entry) => entry.id !== item.id)))
-      setMessage('Menu item deleted.')
+      setMessage('Menu item deleted successfully.')
     } catch (err) {
-      setError(err.message || 'Unable to delete menu item')
+      setError(getFriendlyError(err, 'Could not delete the menu item. Please try again.'))
     }
   }
 
@@ -165,7 +166,7 @@ export default function AdminMenuPage() {
       setItems((prev) => prev.map((entry) => (entry.id === updated.id ? updated : entry)))
       setSavedItems((prev) => prev.map((entry) => (entry.id === updated.id ? updated : entry)))
     } catch (err) {
-      setError(err.message || 'Unable to update availability')
+      setError(getFriendlyError(err, 'Could not update availability. Please try again.'))
     }
   }
 

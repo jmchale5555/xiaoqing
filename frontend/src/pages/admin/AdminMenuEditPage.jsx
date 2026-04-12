@@ -3,6 +3,7 @@ import { Link, useNavigate, useParams } from 'react-router-dom'
 import AdminGuard from '../../components/AdminGuard'
 import MenuItemForm from '../../components/MenuItemForm'
 import { fetchMenuItem, updateMenuItem } from '../../lib/menu'
+import { getFriendlyError } from '../../lib/errors'
 
 export default function AdminMenuEditPage() {
   const { id } = useParams()
@@ -27,7 +28,7 @@ export default function AdminMenuEditPage() {
         if (!mounted) {
           return
         }
-        setError(err.message || 'Unable to load menu item')
+        setError(getFriendlyError(err, 'Could not load this menu item. Please refresh and try again.'))
       } finally {
         if (mounted) {
           setLoading(false)

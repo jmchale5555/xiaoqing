@@ -5,6 +5,7 @@ namespace Controller\Api;
 use Core\ApiController;
 use Core\Request;
 use Core\Session;
+use Model\User;
 
 defined('ROOTPATH') or exit('Access Denied');
 
@@ -35,7 +36,7 @@ class UploadsController extends ApiController
         $request = new Request();
         $payload = $request->post();
 
-        if (!$this->verifyCsrfToken($payload) || !$this->requireAuthenticatedUser())
+        if (!$this->verifyCsrfToken($payload) || !$this->requireStaffUser())
         {
             return;
         }
@@ -121,7 +122,7 @@ class UploadsController extends ApiController
         ], 201);
     }
 
-    private function requireAuthenticatedUser(): mixed
+    private function requireStaffUser(): mixed
     {
         $session = new Session();
         $user = $session->user();
@@ -129,6 +130,13 @@ class UploadsController extends ApiController
         if (!$user)
         {
             $this->unauthenticated();
+            return null;
+        }
+
+        $role = (string)($user->role ?? User::ROLE_CUSTOMER);
+        if (!in_array($role, [User::ROLE_STAFF, User::ROLE_MANAGER], true))
+        {
+            $this->forbidden('Staff access required');
             return null;
         }
 

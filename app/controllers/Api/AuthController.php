@@ -168,6 +168,8 @@ class AuthController extends ApiController
         $payload['password'] = password_hash((string)$payload['password'], PASSWORD_BCRYPT);
         unset($payload['confirm']);
 
+        $payload['role'] = $this->isFirstUser($user) ? User::ROLE_MANAGER : User::ROLE_CUSTOMER;
+
         try
         {
             $user->insert($payload);
@@ -272,6 +274,21 @@ class AuthController extends ApiController
             'id' => $user->id ?? null,
             'name' => $user->name ?? null,
             'email' => $user->email ?? null,
+            'role' => $user->role ?? User::ROLE_CUSTOMER,
         ];
+    }
+
+    private function isFirstUser(User $user): bool
+    {
+        try
+        {
+            $rows = $user->all(1, 0, 'id', 'asc', ['id']);
+        }
+        catch (Throwable $e)
+        {
+            return false;
+        }
+
+        return !is_array($rows) || count($rows) === 0;
     }
 }

@@ -56,7 +56,7 @@ describe('AdminMenuPage reorder', () => {
     await user.click(screen.getByRole('button', { name: 'Save order' }))
 
     await waitFor(() => {
-      expect(screen.getByText(/Order was restored to last saved state/)).toBeInTheDocument()
+      expect(screen.getByText(/previous saved order was restored/i)).toBeInTheDocument()
     })
 
     const names = Array.from(container.querySelectorAll('tbody tr strong')).map((el) => el.textContent)

@@ -45,6 +45,11 @@ class ApiController
         $this->error($message, 401);
     }
 
+    protected function forbidden(string $message = 'Forbidden'): void
+    {
+        $this->error($message, 403);
+    }
+
     protected function validationError(array $errors, string $message = 'Validation failed'): void
     {
         $this->error($message, 422, $errors);

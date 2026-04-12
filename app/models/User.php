@@ -5,6 +5,10 @@ namespace Model;
 class User
 {
 
+    public const ROLE_CUSTOMER = 'customer';
+    public const ROLE_STAFF = 'staff';
+    public const ROLE_MANAGER = 'manager';
+
     use Model;
 
     protected $table = 'users';
@@ -13,6 +17,7 @@ class User
         'name',
         'email',
         'password',
+        'role',
     ];
 
     public function validate($data)

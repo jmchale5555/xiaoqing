@@ -1,5 +1,6 @@
 import { useState } from 'react'
 import { signup } from '../lib/auth'
+import { getFriendlyError } from '../lib/errors'
 
 export default function SignupPage() {
   const [form, setForm] = useState({ name: '', email: '', password: '', confirm: '' })
@@ -13,10 +14,9 @@ export default function SignupPage() {
 
     try {
       const data = await signup(form)
-      setMessage(`Account created for ${data.user?.name ?? 'user'}.`)
+      setMessage(`Account created successfully for ${data.user?.name ?? 'user'}.`)
     } catch (err) {
-      const fieldErrors = err.payload?.errors ? Object.values(err.payload.errors) : []
-      setError(fieldErrors[0] || err.message || 'Signup failed')
+      setError(getFriendlyError(err, 'Could not create your account. Please review the form and try again.'))
     }
   }
 

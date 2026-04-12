@@ -70,6 +70,24 @@
 - Fixed initial `AdminBookingDetailPage` availability lookup to use the loaded booking form values (including party size) instead of stale default form state.
 - Added test coverage to verify initial availability request uses the booking's actual `party_size`.
 
+2026-04-12 | Phase 3 start: validation and friendly error consistency pass
+- Added shared frontend helper `frontend/src/lib/errors.js` (`getFriendlyError`) to consistently extract first field error, payload message, or fallback text.
+- Applied helper across auth, menu, and booking screens to normalize user-facing error feedback and avoid raw/inconsistent API message handling.
+- Verified frontend and backend suites after changes (`npm run test:frontend`, `phpunit --testsuite Feature`).
+
+2026-04-12 | Frontend UX polish: consistent error language tone
+- Standardized fallback error phrasing across auth/menu/bookings to clear, action-oriented copy ("Could not ... Please ...").
+- Updated one menu page test assertion to match revised copy while preserving behavior checks.
+
+2026-04-12 | Frontend UX polish: consistent success message tone
+- Standardized success copy across bookings/menu/auth actions to consistent "... successfully" phrasing.
+- Updated booking board test assertion for revised create-success message and re-ran frontend test suite.
+
+2026-04-12 | Phase 3: authorization hardening foundations
+- Added user roles via migration (`users.role`) and auth role assignment policy (first account becomes `manager`, later signups default to `customer`), and exposed role in `/api/auth/me`.
+- Enforced staff/manager authorization (`403 Staff access required`) for mutating menu/tables/bookings/uploads API endpoints.
+- Updated frontend role handling (`AdminGuard`, `NavBar`) to gate admin UI by role, plus added feature tests for customer-role denial on menu/table/booking creation.
+
 2026-04-12 | Data: seeded initial dining table mix
 - Added migration `database/migrations/20260412_000500_seed_dining_tables.php` to seed 15 tables (7 small, 5 medium, 3 large).
 - Applied migration in dev DB and verified distribution counts: 7 (`<=2` seats), 5 (`4-5` seats), 3 (`6-10` seats).

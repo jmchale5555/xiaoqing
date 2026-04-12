@@ -1,6 +1,7 @@
 import { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { login } from '../lib/auth'
+import { getFriendlyError } from '../lib/errors'
 
 export default function LoginPage() {
   const navigate = useNavigate()
@@ -17,8 +18,7 @@ export default function LoginPage() {
       await login(form)
       navigate('/')
     } catch (err) {
-      const fieldErrors = err.payload?.errors ? Object.values(err.payload.errors) : []
-      setError(fieldErrors[0] || err.message || 'Login failed')
+      setError(getFriendlyError(err, 'Could not sign in. Please check your details and try again.'))
     }
   }
 
