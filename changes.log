@@ -112,6 +112,15 @@
 - Added automatic selection of the first booking when the board loads (or when current selection is no longer in filtered results).
 - Made booking rows clickable so staff can select a booking directly from the table to drive Assignment Assist.
 
+2026-04-12 | Auth stack: change password + navbar account hamburger
+- Added backend endpoint `POST /api/auth/change_password` with CSRF/auth checks, current-password verification, strong validation, and session refresh after update.
+- Added frontend change-password flow (`/change-password`) and API client helper in `frontend/src/lib/auth.js`.
+- Updated `NavBar` to use a hamburger account dropdown: logged-out shows `Login`/`Sign up`; logged-in shows `Change password`/`Logout`.
+
+2026-04-12 | UX polish: account menu icon sizing + password page flow
+- Increased hamburger trigger size for clearer visibility and touch target in navbar.
+- Removed automatic redirect after password change; page now stays in place with success feedback and explicit "Back to home" action.
+
 2026-04-12 | Data: seeded initial dining table mix
 - Added migration `database/migrations/20260412_000500_seed_dining_tables.php` to seed 15 tables (7 small, 5 medium, 3 large).
 - Applied migration in dev DB and verified distribution counts: 7 (`<=2` seats), 5 (`4-5` seats), 3 (`6-10` seats).

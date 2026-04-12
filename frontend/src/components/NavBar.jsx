@@ -8,6 +8,7 @@ export default function NavBar() {
   const navigate = useNavigate()
   const location = useLocation()
   const [user, setUser] = useState(null)
+  const [menuOpen, setMenuOpen] = useState(false)
 
   const isAuthenticated = Boolean(user)
   const role = String(user?.role || '')
@@ -35,6 +36,10 @@ export default function NavBar() {
     return () => {
       mounted = false
     }
+  }, [location.pathname])
+
+  useEffect(() => {
+    setMenuOpen(false)
   }, [location.pathname])
 
   async function onLogout() {
@@ -71,20 +76,41 @@ export default function NavBar() {
               </NavLink>
             </>
           ) : null}
-          {isAuthenticated ? (
-            <button type="button" onClick={onLogout}>
-              Logout
+          <div className="auth-menu-wrap">
+            <button
+              type="button"
+              className="auth-menu-trigger"
+              aria-label="Open account menu"
+              aria-expanded={menuOpen}
+              onClick={() => setMenuOpen((prev) => !prev)}
+            >
+              ☰
             </button>
-          ) : (
-            <>
-              <NavLink to="/login" className={({ isActive }) => (isActive ? active : '')}>
-                Login
-              </NavLink>
-              <NavLink to="/signup" className={({ isActive }) => (isActive ? active : '')}>
-                Sign up
-              </NavLink>
-            </>
-          )}
+
+            {menuOpen ? (
+              <div className="auth-menu-dropdown">
+                {isAuthenticated ? (
+                  <>
+                    <NavLink to="/change-password" className={({ isActive }) => (isActive ? `auth-menu-link ${active}` : 'auth-menu-link')}>
+                      Change password
+                    </NavLink>
+                    <button type="button" className="auth-menu-link" onClick={onLogout}>
+                      Logout
+                    </button>
+                  </>
+                ) : (
+                  <>
+                    <NavLink to="/login" className={({ isActive }) => (isActive ? `auth-menu-link ${active}` : 'auth-menu-link')}>
+                      Login
+                    </NavLink>
+                    <NavLink to="/signup" className={({ isActive }) => (isActive ? `auth-menu-link ${active}` : 'auth-menu-link')}>
+                      Sign up
+                    </NavLink>
+                  </>
+                )}
+              </div>
+            ) : null}
+          </div>
         </nav>
       </div>
     </header>

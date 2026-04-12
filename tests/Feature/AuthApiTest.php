@@ -83,4 +83,61 @@ class AuthApiTest extends TestCase
         $this->assertSame(401, $login['status']);
         $this->assertSame('Wrong email or password', $login['json']['message'] ?? null);
     }
+
+    public function testChangePasswordFlow(): void
+    {
+        $signupToken = $this->client->csrfToken();
+        $email = 'changepass' . time() . '@example.com';
+
+        $signup = $this->client->post('/api/auth/signup', [
+            'name' => 'Change Password User',
+            'email' => $email,
+            'password' => 'secret123',
+            'confirm' => 'secret123',
+        ], ['X-CSRF-Token' => $signupToken]);
+        $this->assertSame(201, $signup['status']);
+
+        $token = $this->client->csrfToken();
+        $change = $this->client->post('/api/auth/change_password', [
+            'current_password' => 'secret123',
+            'new_password' => 'newSecret456',
+            'confirm_password' => 'newSecret456',
+        ], ['X-CSRF-Token' => $token]);
+
+        $this->assertSame(200, $change['status']);
+        $this->assertSame('Password updated successfully', $change['json']['message'] ?? null);
+
+        $logoutToken = $this->client->csrfToken();
+        $logout = $this->client->post('/api/auth/logout', [], ['X-CSRF-Token' => $logoutToken]);
+        $this->assertSame(200, $logout['status']);
+
+        $oldLoginToken = $this->client->csrfToken();
+        $oldLogin = $this->client->post('/api/auth/login', [
+            'email' => $email,
+            'password' => 'secret123',
+        ], ['X-CSRF-Token' => $oldLoginToken]);
+        $this->assertSame(401, $oldLogin['status']);
+
+        $newLoginToken = $this->client->csrfToken();
+        $newLogin = $this->client->post('/api/auth/login', [
+            'email' => $email,
+            'password' => 'newSecret456',
+        ], ['X-CSRF-Token' => $newLoginToken]);
+        $this->assertSame(200, $newLogin['status']);
+    }
+
+    public function testChangePasswordRequiresAuthentication(): void
+    {
+        $token = $this->client->csrfToken();
+        $this->client->post('/api/auth/logout', [], ['X-CSRF-Token' => $token]);
+
+        $token2 = $this->client->csrfToken();
+        $response = $this->client->post('/api/auth/change_password', [
+            'current_password' => 'secret123',
+            'new_password' => 'newSecret456',
+            'confirm_password' => 'newSecret456',
+        ], ['X-CSRF-Token' => $token2]);
+
+        $this->assertSame(401, $response['status']);
+    }
 }

@@ -80,6 +80,57 @@ body {
   color: #fff;
 }
 
+.auth-menu-wrap {
+  position: relative;
+}
+
+.auth-menu-trigger {
+  border: 1px solid rgba(154, 59, 59, 0.25);
+  border-radius: 0.65rem;
+  min-width: 2.35rem;
+  min-height: 2.35rem;
+  padding: 0.2rem;
+  background: rgba(154, 59, 59, 0.1);
+  color: var(--accent-deep);
+  font: inherit;
+  font-size: 1.25rem;
+  line-height: 1;
+  cursor: pointer;
+}
+
+.auth-menu-dropdown {
+  position: absolute;
+  right: 0;
+  top: calc(100% + 0.4rem);
+  min-width: 11rem;
+  border: 1px solid rgba(45, 31, 26, 0.14);
+  border-radius: 0.75rem;
+  background: rgba(255, 247, 227, 0.98);
+  box-shadow: 0 8px 24px rgba(45, 31, 26, 0.14);
+  padding: 0.35rem;
+  display: grid;
+  gap: 0.25rem;
+  z-index: 30;
+}
+
+.auth-menu-link {
+  display: block;
+  width: 100%;
+  text-align: left;
+  border: 0;
+  border-radius: 0.55rem;
+  padding: 0.45rem 0.6rem;
+  background: transparent;
+  color: var(--muted);
+  font: inherit;
+  cursor: pointer;
+}
+
+.auth-menu-link:hover {
+  background: rgba(154, 59, 59, 0.12);
+  color: var(--accent-deep);
+}
+
 .menu-shell {
   display: grid;
   gap: 1.25rem;

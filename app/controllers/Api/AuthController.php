@@ -19,6 +19,7 @@ class AuthController extends ApiController
                 'POST /api/auth/login',
                 'POST /api/auth/signup',
                 'POST /api/auth/logout',
+                'POST /api/auth/change_password',
                 'GET /api/auth/me',
                 'GET /api/auth/csrf',
             ],
@@ -229,6 +230,123 @@ class AuthController extends ApiController
         $this->ok(['ok' => true]);
     }
 
+    public function change_password(): void
+    {
+        if (($_SERVER['REQUEST_METHOD'] ?? 'GET') !== 'POST')
+        {
+            $this->methodNotAllowed(['POST']);
+            return;
+        }
+
+        $request = new Request();
+        $payload = $request->json();
+        if (empty($payload))
+        {
+            $payload = $request->post();
+        }
+
+        if (!$this->verifyCsrf($payload))
+        {
+            return;
+        }
+
+        $sessionUser = $this->requireAuthenticatedUser();
+        if (!$sessionUser)
+        {
+            return;
+        }
+
+        $currentPassword = (string)($payload['current_password'] ?? '');
+        $newPassword = (string)($payload['new_password'] ?? '');
+        $confirmPassword = (string)($payload['confirm_password'] ?? '');
+
+        $errors = [];
+        if ($currentPassword === '')
+        {
+            $errors['current_password'] = 'Current password is required';
+        }
+
+        if ($newPassword === '')
+        {
+            $errors['new_password'] = 'New password is required';
+        }
+        elseif (strlen($newPassword) < 8)
+        {
+            $errors['new_password'] = 'New password must be at least 8 characters';
+        }
+
+        if ($confirmPassword === '')
+        {
+            $errors['confirm_password'] = 'Please confirm the new password';
+        }
+        elseif ($confirmPassword !== $newPassword)
+        {
+            $errors['confirm_password'] = 'Password confirmation does not match';
+        }
+
+        if (!empty($errors))
+        {
+            $this->validationError($errors);
+            return;
+        }
+
+        $userModel = new User();
+        try
+        {
+            $freshUser = $userModel->first(['id' => (int)($sessionUser->id ?? 0)]);
+        }
+        catch (Throwable $e)
+        {
+            $this->error('Authentication service unavailable', 500);
+            return;
+        }
+
+        if (!$freshUser)
+        {
+            $this->unauthenticated();
+            return;
+        }
+
+        if (!password_verify($currentPassword, (string)($freshUser->password ?? '')))
+        {
+            $this->validationError(['current_password' => 'Current password is incorrect']);
+            return;
+        }
+
+        if (password_verify($newPassword, (string)($freshUser->password ?? '')))
+        {
+            $this->validationError(['new_password' => 'New password must be different from current password']);
+            return;
+        }
+
+        try
+        {
+            $userModel->update((int)$freshUser->id, ['password' => password_hash($newPassword, PASSWORD_BCRYPT)]);
+            $updated = $userModel->first(['id' => (int)$freshUser->id]);
+        }
+        catch (Throwable $e)
+        {
+            $this->error('Authentication service unavailable', 500);
+            return;
+        }
+
+        if (!$updated)
+        {
+            $this->error('Unable to update password', 500);
+            return;
+        }
+
+        $session = new Session();
+        $session->auth($updated);
+
+        if (session_status() === PHP_SESSION_ACTIVE)
+        {
+            session_regenerate_id(true);
+        }
+
+        $this->ok(['message' => 'Password updated successfully']);
+    }
+
     private function issueCsrfToken(): string
     {
         $session = new Session();
@@ -276,6 +394,20 @@ class AuthController extends ApiController
             'email' => $user->email ?? null,
             'role' => $user->role ?? User::ROLE_CUSTOMER,
         ];
+    }
+
+    private function requireAuthenticatedUser(): mixed
+    {
+        $session = new Session();
+        $user = $session->user();
+
+        if (!$user)
+        {
+            $this->unauthenticated();
+            return null;
+        }
+
+        return $user;
     }
 
     private function isFirstUser(User $user): bool

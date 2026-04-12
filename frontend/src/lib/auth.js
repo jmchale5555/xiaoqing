@@ -54,3 +54,7 @@ export function signup(payload) {
 export function logout() {
   return withCsrf('/api/auth/logout')
 }
+
+export function changePassword(payload) {
+  return withCsrf('/api/auth/change_password', payload)
+}

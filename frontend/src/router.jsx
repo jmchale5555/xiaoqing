@@ -4,6 +4,7 @@ import HomePage from './pages/HomePage'
 import MenuPage from './pages/MenuPage'
 import LoginPage from './pages/LoginPage'
 import SignupPage from './pages/SignupPage'
+import ChangePasswordPage from './pages/ChangePasswordPage'
 import NotFoundPage from './pages/NotFoundPage'
 import AdminMenuPage from './pages/admin/AdminMenuPage'
 import AdminMenuNewPage from './pages/admin/AdminMenuNewPage'
@@ -25,6 +26,7 @@ export const router = createBrowserRouter([
       { path: 'admin/bookings/:id', element: <AdminBookingDetailPage /> },
       { path: 'login', element: <LoginPage /> },
       { path: 'signup', element: <SignupPage /> },
+      { path: 'change-password', element: <ChangePasswordPage /> },
       { path: '*', element: <NotFoundPage /> },
     ],
   },
