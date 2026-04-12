@@ -88,6 +88,30 @@
 - Enforced staff/manager authorization (`403 Staff access required`) for mutating menu/tables/bookings/uploads API endpoints.
 - Updated frontend role handling (`AdminGuard`, `NavBar`) to gate admin UI by role, plus added feature tests for customer-role denial on menu/table/booking creation.
 
+2026-04-12 | Phase 3: authorization negative test matrix expansion
+- Added feature tests asserting customer-role denial (`403`) for mutating flows beyond create: menu update/delete/reorder, tables update/delete/reorder, and bookings update/cancel/assign.
+- Added reusable customer-client helpers in menu/tables/bookings feature tests for role-specific authorization checks.
+- Re-ran feature suite after updates (44 tests, 270 assertions passing).
+
+2026-04-12 | Phase 3: booking audit trail foundation
+- Added booking audit storage via migration `database/migrations/20260412_000530_create_booking_events_table.php` and model `app/models/BookingEvent.php`.
+- Instrumented `BookingsController` to record lifecycle events for create, detail updates, status changes, cancel, and table assignment/reassignment/unassignment.
+- Extended booking `show` response with `events` and added feature coverage validating expected lifecycle event types.
+
+2026-04-12 | Frontend: booking detail activity panel
+- Added an Activity panel to `AdminBookingDetailPage` that renders booking audit events returned by `GET /api/bookings/show/{id}`.
+- Included readable event titles/details and timestamps plus supporting styles for event cards.
+- Added frontend test coverage for event rendering and re-ran frontend + feature suites.
+
+2026-04-12 | Ops: restore baseline app data after local reset
+- Upserted `john@example.com` as `manager` in `phpsk.users` (created account if missing).
+- Re-seeded menu via `cli/seed_menu.php` from `menuplan/Restaurant.md` (11 items, all available).
+- Verified baseline counts in `phpsk`: users=1, menu_items=11, tables=15, bookings=0.
+
+2026-04-12 | Frontend: bookings board selection usability fix
+- Added automatic selection of the first booking when the board loads (or when current selection is no longer in filtered results).
+- Made booking rows clickable so staff can select a booking directly from the table to drive Assignment Assist.
+
 2026-04-12 | Data: seeded initial dining table mix
 - Added migration `database/migrations/20260412_000500_seed_dining_tables.php` to seed 15 tables (7 small, 5 medium, 3 large).
 - Applied migration in dev DB and verified distribution counts: 7 (`<=2` seats), 5 (`4-5` seats), 3 (`6-10` seats).

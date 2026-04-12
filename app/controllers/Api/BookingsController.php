@@ -6,6 +6,7 @@ use Core\ApiController;
 use Core\Request;
 use Core\Session;
 use Model\Booking;
+use Model\BookingEvent;
 use Model\DiningTable;
 use Model\User;
 use Throwable;
@@ -120,7 +121,10 @@ class BookingsController extends ApiController
             return;
         }
 
-        $this->ok(['booking' => $this->formatBooking($row)]);
+        $this->ok([
+            'booking' => $this->formatBooking($row),
+            'events' => $this->listBookingEvents($bookingId),
+        ]);
     }
 
     public function create(): void
@@ -131,7 +135,13 @@ class BookingsController extends ApiController
         }
 
         $payload = $this->readPayload();
-        if (!$this->verifyCsrfToken($payload) || !$this->requireStaffUser())
+        if (!$this->verifyCsrfToken($payload))
+        {
+            return;
+        }
+
+        $sessionUser = $this->requireStaffUser();
+        if (!$sessionUser)
         {
             return;
         }
@@ -183,6 +193,19 @@ class BookingsController extends ApiController
             return;
         }
 
+        $this->recordBookingEvent(
+            (int)($created->id ?? 0),
+            'booking_created',
+            null,
+            null,
+            [
+                'status' => (string)($created->status ?? Booking::STATUS_PENDING),
+                'table_id' => ($created->table_id ?? null) !== null ? (int)$created->table_id : null,
+                'party_size' => (int)($created->party_size ?? 0),
+            ],
+            (int)($sessionUser->id ?? 0)
+        );
+
         $this->ok(['booking' => $this->formatBooking($created)], 201);
     }
 
@@ -201,7 +224,13 @@ class BookingsController extends ApiController
         }
 
         $payload = $this->readPayload();
-        if (!$this->verifyCsrfToken($payload) || !$this->requireStaffUser())
+        if (!$this->verifyCsrfToken($payload))
+        {
+            return;
+        }
+
+        $sessionUser = $this->requireStaffUser();
+        if (!$sessionUser)
         {
             return;
         }
@@ -284,6 +313,8 @@ class BookingsController extends ApiController
             return;
         }
 
+        $this->recordBookingUpdateEvents($existing, $updated, (int)($sessionUser->id ?? 0));
+
         $this->ok(['booking' => $this->formatBooking($updated)]);
     }
 
@@ -302,7 +333,13 @@ class BookingsController extends ApiController
         }
 
         $payload = $this->readPayload();
-        if (!$this->verifyCsrfToken($payload) || !$this->requireStaffUser())
+        if (!$this->verifyCsrfToken($payload))
+        {
+            return;
+        }
+
+        $sessionUser = $this->requireStaffUser();
+        if (!$sessionUser)
         {
             return;
         }
@@ -344,6 +381,15 @@ class BookingsController extends ApiController
             return;
         }
 
+        $this->recordBookingEvent(
+            $bookingId,
+            'booking_cancelled',
+            (string)($existing->status ?? ''),
+            Booking::STATUS_CANCELLED,
+            null,
+            (int)($sessionUser->id ?? 0)
+        );
+
         $this->ok(['booking' => $this->formatBooking($updated)]);
     }
 
@@ -362,7 +408,13 @@ class BookingsController extends ApiController
         }
 
         $payload = $this->readPayload();
-        if (!$this->verifyCsrfToken($payload) || !$this->requireStaffUser())
+        if (!$this->verifyCsrfToken($payload))
+        {
+            return;
+        }
+
+        $sessionUser = $this->requireStaffUser();
+        if (!$sessionUser)
         {
             return;
         }
@@ -419,6 +471,17 @@ class BookingsController extends ApiController
             $this->error('Unable to assign table', 500);
             return;
         }
+
+        $fromTableId = ($existing->table_id ?? null) !== null ? (int)$existing->table_id : null;
+        $eventType = $fromTableId === null ? 'booking_table_assigned' : 'booking_table_reassigned';
+        $this->recordBookingEvent(
+            $bookingId,
+            $eventType,
+            $fromTableId,
+            $tableId,
+            null,
+            (int)($sessionUser->id ?? 0)
+        );
 
         $this->ok(['booking' => $this->formatBooking($updated)]);
     }
@@ -1006,6 +1069,173 @@ class BookingsController extends ApiController
             'is_active' => !empty($row->is_active),
             'display_order' => isset($row->display_order) ? (int)$row->display_order : 0,
         ];
+    }
+
+    private function listBookingEvents(int $bookingId): array
+    {
+        if ($bookingId <= 0)
+        {
+            return [];
+        }
+
+        $events = new BookingEvent();
+
+        try
+        {
+            $rows = $events->where(['booking_id' => $bookingId], [], [], 200, 0, 'id', 'desc', ['id', 'created_at']);
+        }
+        catch (Throwable $e)
+        {
+            return [];
+        }
+
+        if (!is_array($rows))
+        {
+            return [];
+        }
+
+        return array_map([$this, 'formatBookingEvent'], $rows);
+    }
+
+    private function formatBookingEvent(mixed $row): array
+    {
+        $meta = null;
+        $rawMeta = $row->meta_json ?? null;
+        if (is_string($rawMeta) && $rawMeta !== '')
+        {
+            $decoded = json_decode($rawMeta, true);
+            if (is_array($decoded))
+            {
+                $meta = $decoded;
+            }
+        }
+
+        return [
+            'id' => isset($row->id) ? (int)$row->id : null,
+            'booking_id' => isset($row->booking_id) ? (int)$row->booking_id : null,
+            'event_type' => (string)($row->event_type ?? ''),
+            'actor_user_id' => ($row->actor_user_id ?? null) !== null ? (int)$row->actor_user_id : null,
+            'from_value' => $row->from_value ?? null,
+            'to_value' => $row->to_value ?? null,
+            'meta' => $meta,
+            'created_at' => $row->created_at ?? null,
+        ];
+    }
+
+    private function recordBookingEvent(
+        int $bookingId,
+        string $eventType,
+        mixed $fromValue,
+        mixed $toValue,
+        ?array $meta,
+        int $actorUserId
+    ): void {
+        if ($bookingId <= 0 || $eventType === '')
+        {
+            return;
+        }
+
+        $events = new BookingEvent();
+        $payload = [
+            'booking_id' => $bookingId,
+            'event_type' => $eventType,
+            'actor_user_id' => $actorUserId > 0 ? $actorUserId : null,
+            'from_value' => $this->stringifyAuditValue($fromValue),
+            'to_value' => $this->stringifyAuditValue($toValue),
+            'meta_json' => $meta !== null ? json_encode($meta) : null,
+            'created_at' => date('Y-m-d H:i:s'),
+        ];
+
+        try
+        {
+            $events->insert($payload);
+        }
+        catch (Throwable $e)
+        {
+            // Audit failures should not block operational booking actions.
+        }
+    }
+
+    private function recordBookingUpdateEvents(mixed $before, mixed $after, int $actorUserId): void
+    {
+        $bookingId = (int)($after->id ?? $before->id ?? 0);
+        if ($bookingId <= 0)
+        {
+            return;
+        }
+
+        $beforeStatus = (string)($before->status ?? Booking::STATUS_PENDING);
+        $afterStatus = (string)($after->status ?? Booking::STATUS_PENDING);
+        if ($beforeStatus !== $afterStatus)
+        {
+            $this->recordBookingEvent($bookingId, 'booking_status_changed', $beforeStatus, $afterStatus, null, $actorUserId);
+        }
+
+        $beforeTableId = ($before->table_id ?? null) !== null ? (int)$before->table_id : null;
+        $afterTableId = ($after->table_id ?? null) !== null ? (int)$after->table_id : null;
+        if ($beforeTableId !== $afterTableId)
+        {
+            $eventType = $beforeTableId === null ? 'booking_table_assigned' : 'booking_table_reassigned';
+            if ($afterTableId === null)
+            {
+                $eventType = 'booking_table_unassigned';
+            }
+
+            $this->recordBookingEvent($bookingId, $eventType, $beforeTableId, $afterTableId, null, $actorUserId);
+        }
+
+        $changedFields = [];
+        $watchFields = [
+            'guest_name',
+            'guest_phone',
+            'guest_email',
+            'party_size',
+            'booking_start',
+            'booking_end',
+            'notes',
+        ];
+
+        foreach ($watchFields as $field)
+        {
+            $beforeValue = $this->stringifyAuditValue($before->{$field} ?? null);
+            $afterValue = $this->stringifyAuditValue($after->{$field} ?? null);
+            if ($beforeValue !== $afterValue)
+            {
+                $changedFields[] = $field;
+            }
+        }
+
+        if (!empty($changedFields))
+        {
+            $this->recordBookingEvent(
+                $bookingId,
+                'booking_details_updated',
+                null,
+                null,
+                ['changed_fields' => $changedFields],
+                $actorUserId
+            );
+        }
+    }
+
+    private function stringifyAuditValue(mixed $value): ?string
+    {
+        if ($value === null)
+        {
+            return null;
+        }
+
+        if (is_bool($value))
+        {
+            return $value ? 'true' : 'false';
+        }
+
+        if (is_scalar($value))
+        {
+            return (string)$value;
+        }
+
+        return json_encode($value);
     }
 
     private function requireWriteMethod(): bool

@@ -43,6 +43,16 @@ describe('AdminBookingDetailPage', () => {
         table_id: null,
         notes: 'Near window',
       },
+      events: [
+        {
+          id: 1,
+          event_type: 'booking_created',
+          from_value: null,
+          to_value: null,
+          created_at: '2026-04-10 10:00:00',
+          meta: null,
+        },
+      ],
     })
     mockFetchBookingAvailability.mockResolvedValue({
       recommended_tables: [],
@@ -160,6 +170,17 @@ describe('AdminBookingDetailPage', () => {
     expect(seatedOption).toBeDisabled()
   })
 
+  test('renders booking activity events', async () => {
+    renderWithRoute()
+
+    await waitFor(() => {
+      expect(screen.getByText('Activity')).toBeInTheDocument()
+    })
+
+    expect(screen.getByText('Booking created')).toBeInTheDocument()
+    expect(screen.getByText('Activity recorded.')).toBeInTheDocument()
+  })
+
   test('uses booking party size when loading initial table availability', async () => {
     mockFetchBooking.mockResolvedValueOnce({
       booking: {
@@ -174,6 +195,7 @@ describe('AdminBookingDetailPage', () => {
         table_id: null,
         notes: 'Near window',
       },
+      events: [],
     })
 
     renderWithRoute()

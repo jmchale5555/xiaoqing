@@ -128,6 +128,25 @@ export default function AdminBookingsPage() {
     return () => window.clearTimeout(timeout)
   }, [availabilityError])
 
+  useEffect(() => {
+    if (loading) {
+      return
+    }
+
+    if (bookings.length === 0) {
+      setSelectedBookingId(null)
+      setAvailability({ recommended_tables: [], larger_tables: [], busy_table_ids: [] })
+      return
+    }
+
+    const current = bookings.find((booking) => booking.id === selectedBookingId)
+    if (current) {
+      return
+    }
+
+    void selectBookingForAssignment(bookings[0])
+  }, [bookings, loading, selectedBookingId])
+
   async function reloadBookings() {
     const updated = await fetchBookings({ status: statusFilter, date: dateFilter })
     return Array.isArray(updated.bookings) ? updated.bookings : []
@@ -353,7 +372,11 @@ export default function AdminBookingsPage() {
                     const currentTable = booking.table_id ? tableMap.get(booking.table_id) : null
 
                     return (
-                      <tr key={booking.id} className={booking.id === selectedBookingId ? 'booking-row-active' : ''}>
+                      <tr
+                        key={booking.id}
+                        className={booking.id === selectedBookingId ? 'booking-row-active booking-row-clickable' : 'booking-row-clickable'}
+                        onClick={() => selectBookingForAssignment(booking)}
+                      >
                         <td>
                           <strong>{booking.guest_name}</strong>
                           <p className="admin-muted">{booking.guest_phone || 'No phone'}</p>

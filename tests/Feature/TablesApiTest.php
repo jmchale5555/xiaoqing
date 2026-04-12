@@ -99,19 +99,7 @@ class TablesApiTest extends TestCase
 
     public function testCreateRequiresStaffRole(): void
     {
-        $customer = new HttpClient(self::baseUrl());
-        $email = 'tables-customer-' . str_replace('.', '', uniqid('', true)) . '@example.com';
-
-        $signupToken = $customer->csrfToken();
-        $signup = $customer->post('/api/auth/signup', [
-            'name' => 'Tables Customer',
-            'email' => $email,
-            'password' => 'secret123',
-            'confirm' => 'secret123',
-        ], ['X-CSRF-Token' => $signupToken]);
-
-        $this->assertSame(201, $signup['status']);
-        $this->assertSame('customer', $signup['json']['user']['role'] ?? null);
+        $customer = $this->createCustomerClient('tables-customer-');
 
         $token = $customer->csrfToken();
         $response = $customer->post('/api/tables/create', [
@@ -120,6 +108,31 @@ class TablesApiTest extends TestCase
         ], ['X-CSRF-Token' => $token]);
 
         $this->assertSame(403, $response['status']);
+    }
+
+    public function testTablesUpdateDeleteAndReorderRequireStaffRole(): void
+    {
+        $tableId = $this->createTable('Staff Table', 4);
+        $customer = $this->createCustomerClient('tables-customer-mutate-');
+
+        $updateToken = $customer->csrfToken();
+        $update = $customer->post('/api/tables/update/' . $tableId, [
+            'name' => 'Not allowed',
+        ], ['X-CSRF-Token' => $updateToken]);
+        $this->assertSame(403, $update['status']);
+
+        $deleteToken = $customer->csrfToken();
+        $delete = $customer->post('/api/tables/delete/' . $tableId, [], ['X-CSRF-Token' => $deleteToken]);
+        $this->assertSame(403, $delete['status']);
+
+        $firstId = $this->createTable('TR1', 2);
+        $secondId = $this->createTable('TR2', 4);
+
+        $reorderToken = $customer->csrfToken();
+        $reorder = $customer->post('/api/tables/reorder', [
+            'ids' => [$secondId, $firstId],
+        ], ['X-CSRF-Token' => $reorderToken]);
+        $this->assertSame(403, $reorder['status']);
     }
 
     public function testTablesReorderPersistsOrder(): void
@@ -218,5 +231,24 @@ class TablesApiTest extends TestCase
         $this->assertSame(201, $response['status']);
 
         return (int)($response['json']['table']['id'] ?? 0);
+    }
+
+    private function createCustomerClient(string $prefix): HttpClient
+    {
+        $customer = new HttpClient(self::baseUrl());
+        $email = $prefix . str_replace('.', '', uniqid('', true)) . '@example.com';
+
+        $signupToken = $customer->csrfToken();
+        $signup = $customer->post('/api/auth/signup', [
+            'name' => 'Tables Customer',
+            'email' => $email,
+            'password' => 'secret123',
+            'confirm' => 'secret123',
+        ], ['X-CSRF-Token' => $signupToken]);
+
+        $this->assertSame(201, $signup['status']);
+        $this->assertSame('customer', $signup['json']['user']['role'] ?? null);
+
+        return $customer;
     }
 }

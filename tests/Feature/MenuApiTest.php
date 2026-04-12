@@ -104,19 +104,7 @@ class MenuApiTest extends TestCase
 
     public function testCreateRequiresStaffRole(): void
     {
-        $customer = new HttpClient(self::baseUrl());
-        $email = 'menu-customer-' . str_replace('.', '', uniqid('', true)) . '@example.com';
-
-        $signupToken = $customer->csrfToken();
-        $signup = $customer->post('/api/auth/signup', [
-            'name' => 'Menu Customer',
-            'email' => $email,
-            'password' => 'secret123',
-            'confirm' => 'secret123',
-        ], ['X-CSRF-Token' => $signupToken]);
-
-        $this->assertSame(201, $signup['status']);
-        $this->assertSame('customer', $signup['json']['user']['role'] ?? null);
+        $customer = $this->createCustomerClient('menu-customer-');
 
         $token = $customer->csrfToken();
         $response = $customer->post('/api/menu/create', [
@@ -125,6 +113,31 @@ class MenuApiTest extends TestCase
         ], ['X-CSRF-Token' => $token]);
 
         $this->assertSame(403, $response['status']);
+    }
+
+    public function testMenuUpdateDeleteAndReorderRequireStaffRole(): void
+    {
+        $itemId = $this->createMenuItem('Staff item', 1400);
+        $customer = $this->createCustomerClient('menu-customer-mutate-');
+
+        $updateToken = $customer->csrfToken();
+        $update = $customer->post('/api/menu/update/' . $itemId, [
+            'name' => 'Not allowed',
+        ], ['X-CSRF-Token' => $updateToken]);
+        $this->assertSame(403, $update['status']);
+
+        $deleteToken = $customer->csrfToken();
+        $delete = $customer->post('/api/menu/delete/' . $itemId, [], ['X-CSRF-Token' => $deleteToken]);
+        $this->assertSame(403, $delete['status']);
+
+        $firstId = $this->createMenuItem('Reorder A', 900);
+        $secondId = $this->createMenuItem('Reorder B', 950);
+
+        $reorderToken = $customer->csrfToken();
+        $reorder = $customer->post('/api/menu/reorder', [
+            'ids' => [$secondId, $firstId],
+        ], ['X-CSRF-Token' => $reorderToken]);
+        $this->assertSame(403, $reorder['status']);
     }
 
     public function testMenuReorderPersistsOrder(): void
@@ -270,5 +283,24 @@ class MenuApiTest extends TestCase
         file_put_contents($path, 'not-an-image');
 
         return $path;
+    }
+
+    private function createCustomerClient(string $prefix): HttpClient
+    {
+        $customer = new HttpClient(self::baseUrl());
+        $email = $prefix . str_replace('.', '', uniqid('', true)) . '@example.com';
+
+        $signupToken = $customer->csrfToken();
+        $signup = $customer->post('/api/auth/signup', [
+            'name' => 'Menu Customer',
+            'email' => $email,
+            'password' => 'secret123',
+            'confirm' => 'secret123',
+        ], ['X-CSRF-Token' => $signupToken]);
+
+        $this->assertSame(201, $signup['status']);
+        $this->assertSame('customer', $signup['json']['user']['role'] ?? null);
+
+        return $customer;
     }
 }

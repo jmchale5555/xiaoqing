@@ -40,6 +40,7 @@ export default function AdminBookingDetailPage() {
   const [availabilityLoading, setAvailabilityLoading] = useState(false)
   const [availabilityError, setAvailabilityError] = useState('')
   const [oversizedConfirm, setOversizedConfirm] = useState(null)
+  const [events, setEvents] = useState([])
 
   const tableMap = useMemo(() => {
     const map = new Map()
@@ -68,6 +69,7 @@ export default function AdminBookingDetailPage() {
 
         const nextBooking = bookingData.booking || null
         setBooking(nextBooking)
+        setEvents(Array.isArray(bookingData.events) ? bookingData.events : [])
         setTables(Array.isArray(tablesData.tables) ? tablesData.tables : [])
         const nextForm = nextBooking ? toFormState(nextBooking) : defaultForm()
         setForm(nextForm)
@@ -164,6 +166,7 @@ export default function AdminBookingDetailPage() {
     const bookingData = await fetchBooking(id)
     const nextBooking = bookingData.booking || null
     setBooking(nextBooking)
+    setEvents(Array.isArray(bookingData.events) ? bookingData.events : [])
     setForm(nextBooking ? toFormState(nextBooking) : defaultForm())
     if (nextBooking) {
       await loadAvailability(nextBooking, toFormState(nextBooking))
@@ -406,6 +409,24 @@ export default function AdminBookingDetailPage() {
                 <p className="menu-state">Checking table availability...</p>
               )}
             </aside>
+
+            <aside className="admin-card">
+              <h2 className="booking-panel-title">Activity</h2>
+
+              {events.length === 0 ? <p className="admin-muted">No activity has been recorded yet.</p> : null}
+
+              {events.length > 0 ? (
+                <div className="booking-events-list">
+                  {events.map((event) => (
+                    <article className="booking-event-item" key={event.id || `${event.event_type}-${event.created_at}`}>
+                      <h3>{formatEventTitle(event)}</h3>
+                      <p className="admin-muted">{formatEventDetail(event)}</p>
+                      <p className="admin-muted">{toReadableDateTime(event.created_at)}</p>
+                    </article>
+                  ))}
+                </div>
+              ) : null}
+            </aside>
           </section>
         ) : null}
 
@@ -521,4 +542,59 @@ function normalizeDateTimePayload(value) {
 
   const normalized = value.replace('T', ' ')
   return normalized.length === 16 ? `${normalized}:00` : normalized
+}
+
+function toReadableDateTime(value) {
+  if (!value) {
+    return '-'
+  }
+
+  const date = new Date(String(value).replace(' ', 'T'))
+  if (Number.isNaN(date.getTime())) {
+    return String(value)
+  }
+
+  return new Intl.DateTimeFormat('en-GB', {
+    dateStyle: 'medium',
+    timeStyle: 'short',
+  }).format(date)
+}
+
+function formatEventTitle(event) {
+  const map = {
+    booking_created: 'Booking created',
+    booking_details_updated: 'Booking details updated',
+    booking_status_changed: 'Booking status changed',
+    booking_cancelled: 'Booking cancelled',
+    booking_table_assigned: 'Table assigned',
+    booking_table_reassigned: 'Table reassigned',
+    booking_table_unassigned: 'Table unassigned',
+  }
+
+  return map[event?.event_type] || 'Booking updated'
+}
+
+function formatEventDetail(event) {
+  if (!event || typeof event !== 'object') {
+    return 'Activity recorded.'
+  }
+
+  if (event.event_type === 'booking_status_changed') {
+    return `From ${event.from_value || '-'} to ${event.to_value || '-'}.`
+  }
+
+  if (
+    event.event_type === 'booking_table_assigned' ||
+    event.event_type === 'booking_table_reassigned' ||
+    event.event_type === 'booking_table_unassigned'
+  ) {
+    return `From table ${event.from_value || 'none'} to ${event.to_value || 'none'}.`
+  }
+
+  if (event.event_type === 'booking_details_updated') {
+    const fields = Array.isArray(event?.meta?.changed_fields) ? event.meta.changed_fields : []
+    return fields.length > 0 ? `Changed: ${fields.join(', ')}.` : 'One or more booking fields were changed.'
+  }
+
+  return 'Activity recorded.'
 }
