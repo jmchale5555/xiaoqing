@@ -91,6 +91,42 @@ export default function AdminBookingsPage() {
     }
   }, [statusFilter, dateFilter])
 
+  useEffect(() => {
+    if (!message) {
+      return
+    }
+
+    const timeout = window.setTimeout(() => setMessage(''), 4000)
+    return () => window.clearTimeout(timeout)
+  }, [message])
+
+  useEffect(() => {
+    if (!error) {
+      return
+    }
+
+    const timeout = window.setTimeout(() => setError(''), 4000)
+    return () => window.clearTimeout(timeout)
+  }, [error])
+
+  useEffect(() => {
+    if (!createError) {
+      return
+    }
+
+    const timeout = window.setTimeout(() => setCreateError(''), 4000)
+    return () => window.clearTimeout(timeout)
+  }, [createError])
+
+  useEffect(() => {
+    if (!availabilityError) {
+      return
+    }
+
+    const timeout = window.setTimeout(() => setAvailabilityError(''), 4000)
+    return () => window.clearTimeout(timeout)
+  }, [availabilityError])
+
   async function reloadBookings() {
     const updated = await fetchBookings({ status: statusFilter, date: dateFilter })
     return Array.isArray(updated.bookings) ? updated.bookings : []
@@ -300,7 +336,7 @@ export default function AdminBookingsPage() {
         {!loading && bookings.length > 0 ? (
           <section className="booking-layout">
             <div className="admin-table-wrap">
-              <table className="admin-table">
+              <table className="admin-table booking-table">
                 <thead>
                   <tr>
                     <th>Guest</th>
@@ -330,8 +366,8 @@ export default function AdminBookingsPage() {
                           <span className="admin-chip">{booking.status}</span>
                         </td>
                         <td>{currentTable?.name || booking.table_id || '-'}</td>
-                        <td>
-                          <div className="admin-order-controls">
+                        <td className="booking-actions-cell">
+                          <div className="admin-order-controls booking-actions-col">
                             <button
                               className="admin-mini-btn"
                               onClick={() => selectBookingForAssignment(booking)}
@@ -340,7 +376,7 @@ export default function AdminBookingsPage() {
                               Assign table
                             </button>
                             <Link className="admin-mini-btn" to={`/admin/bookings/${booking.id}`}>
-                              Details
+                              Amend
                             </Link>
                           </div>
                         </td>

@@ -54,7 +54,23 @@ body {
   transition: all 180ms ease;
 }
 
+.site-nav button {
+  border: 0;
+  border-radius: 999px;
+  padding: 0.4rem 0.75rem;
+  transition: all 180ms ease;
+  background: transparent;
+  color: inherit;
+  font: inherit;
+  cursor: pointer;
+}
+
 .site-nav a:hover {
+  background: rgba(154, 59, 59, 0.12);
+  color: var(--accent-deep);
+}
+
+.site-nav button:hover {
   background: rgba(154, 59, 59, 0.12);
   color: var(--accent-deep);
 }
@@ -180,6 +196,8 @@ body {
   padding: 0.58rem 0.66rem;
   font: inherit;
   background: #fff;
+  width: 100%;
+  box-sizing: border-box;
 }
 
 .booking-filter-grid {
@@ -351,6 +369,10 @@ body {
   min-width: 860px;
 }
 
+.booking-table {
+  min-width: 0;
+}
+
 .admin-table th,
 .admin-table td {
   border-bottom: 1px solid rgba(45, 31, 26, 0.1);
@@ -397,6 +419,23 @@ body {
   display: flex;
   gap: 0.45rem;
   align-items: center;
+}
+
+.booking-actions-col {
+  flex-direction: column;
+  align-items: flex-start;
+}
+
+.booking-actions-col .admin-mini-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 7.25rem;
+  text-align: center;
+}
+
+.booking-actions-cell {
+  white-space: nowrap;
 }
 
 .admin-drag-handle {

@@ -34,3 +34,42 @@
 2026-04-12 | Frontend: create modal time-range guard
 - Added client-side validation in `AdminBookingsPage` to block submission when booking end is not after booking start.
 - Added Vitest coverage for invalid time-range submission in `frontend/src/pages/admin/AdminBookingsPage.test.jsx`.
+
+2026-04-12 | Dev runtime fix: Vite base path alignment
+- Updated `public/spa.php` to load dev scripts from `/spa` base (`/spa/@vite/client` and `/spa/src/main.jsx`) to match `vite.config.js`.
+- Fixes MIME/CORS-style browser errors caused by Vite returning plain-text 404 for root-path module URLs.
+
+2026-04-12 | Dev runtime fix: React refresh preamble injection
+- Added `@react-refresh` preamble script to `public/spa.php` dev mode output.
+- Fixes `@vitejs/plugin-react can't detect preamble` runtime error when serving HTML through PHP instead of Vite index transform.
+
+2026-04-12 | Frontend: booking modal field spacing polish
+- Added extra right-side input padding for text/email/number fields in admin forms to improve visual spacing in the New Booking modal.
+
+2026-04-12 | Frontend: booking modal field spacing correction
+- Reverted the prior padding-only tweak and fixed root cause by making admin form controls `width: 100%` with `box-sizing: border-box`.
+- Prevents text/email/number inputs from overflowing into adjacent grid columns or crowding the modal edge.
+
+2026-04-12 | Frontend: bookings board action column layout
+- Stacked bookings action buttons vertically in the table actions cell to avoid horizontal overflow (`Assign table` + `Details`).
+
+2026-04-12 | Frontend: bookings board column width + action button sizing fix
+- Added bookings-table-specific override to remove inherited `min-width: 860px` that was forcing unnecessary horizontal scroll.
+- Refined actions cell/button styles so stacked buttons are compact and center-aligned instead of stretching full-cell width.
+
+2026-04-12 | Frontend auth polish: nav session state + login redirect
+- Updated `NavBar` to detect authenticated session via `/api/auth/me` and show `Logout` instead of `Login`/`Sign up` when signed in.
+- Added logout action in nav that clears session server-side and redirects to home.
+- Updated login flow to redirect to `/` after successful sign-in.
+
+2026-04-12 | Frontend bookings UX: amend label + auto-dismiss notifications
+- Renamed bookings board row action from `Details` to `Amend`.
+- Added 4-second auto-dismiss behavior for booking success/error feedback on board and detail pages (including create and availability errors).
+
+2026-04-12 | Data: seeded initial dining table mix
+- Added migration `database/migrations/20260412_000500_seed_dining_tables.php` to seed 15 tables (7 small, 5 medium, 3 large).
+- Applied migration in dev DB and verified distribution counts: 7 (`<=2` seats), 5 (`4-5` seats), 3 (`6-10` seats).
+
+2026-04-12 | Data: normalized table names by type
+- Added migration `database/migrations/20260412_000510_normalize_table_type_names.php` to rename seeded tables to `Small Table XX`, `Medium Table XX`, and `Large Table XX`.
+- Standardized seats per type to reduce confusion: small=2, medium=4, large=8.

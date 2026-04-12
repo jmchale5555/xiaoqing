@@ -1,7 +1,9 @@
 import { useState } from 'react'
+import { useNavigate } from 'react-router-dom'
 import { login } from '../lib/auth'
 
 export default function LoginPage() {
+  const navigate = useNavigate()
   const [form, setForm] = useState({ email: '', password: '' })
   const [message, setMessage] = useState('')
   const [error, setError] = useState('')
@@ -12,8 +14,8 @@ export default function LoginPage() {
     setMessage('')
 
     try {
-      const data = await login(form)
-      setMessage(`Welcome back, ${data.user?.name ?? 'user'}!`)
+      await login(form)
+      navigate('/')
     } catch (err) {
       const fieldErrors = err.payload?.errors ? Object.values(err.payload.errors) : []
       setError(fieldErrors[0] || err.message || 'Login failed')

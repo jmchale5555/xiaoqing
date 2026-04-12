@@ -92,6 +92,33 @@ export default function AdminBookingDetailPage() {
     }
   }, [id])
 
+  useEffect(() => {
+    if (!message) {
+      return
+    }
+
+    const timeout = window.setTimeout(() => setMessage(''), 4000)
+    return () => window.clearTimeout(timeout)
+  }, [message])
+
+  useEffect(() => {
+    if (!error) {
+      return
+    }
+
+    const timeout = window.setTimeout(() => setError(''), 4000)
+    return () => window.clearTimeout(timeout)
+  }, [error])
+
+  useEffect(() => {
+    if (!availabilityError) {
+      return
+    }
+
+    const timeout = window.setTimeout(() => setAvailabilityError(''), 4000)
+    return () => window.clearTimeout(timeout)
+  }, [availabilityError])
+
   async function loadAvailability(sourceBooking = booking, sourceForm = form) {
     const candidate = sourceBooking || booking
     if (!candidate) {
