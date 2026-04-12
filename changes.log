@@ -66,6 +66,10 @@
 - Renamed bookings board row action from `Details` to `Amend`.
 - Added 4-second auto-dismiss behavior for booking success/error feedback on board and detail pages (including create and availability errors).
 
+2026-04-12 | Frontend fix: booking detail availability party size source
+- Fixed initial `AdminBookingDetailPage` availability lookup to use the loaded booking form values (including party size) instead of stale default form state.
+- Added test coverage to verify initial availability request uses the booking's actual `party_size`.
+
 2026-04-12 | Data: seeded initial dining table mix
 - Added migration `database/migrations/20260412_000500_seed_dining_tables.php` to seed 15 tables (7 small, 5 medium, 3 large).
 - Applied migration in dev DB and verified distribution counts: 7 (`<=2` seats), 5 (`4-5` seats), 3 (`6-10` seats).

@@ -68,10 +68,11 @@ export default function AdminBookingDetailPage() {
         const nextBooking = bookingData.booking || null
         setBooking(nextBooking)
         setTables(Array.isArray(tablesData.tables) ? tablesData.tables : [])
-        setForm(nextBooking ? toFormState(nextBooking) : defaultForm())
+        const nextForm = nextBooking ? toFormState(nextBooking) : defaultForm()
+        setForm(nextForm)
 
         if (nextBooking) {
-          await loadAvailability(nextBooking)
+          await loadAvailability(nextBooking, nextForm)
         }
       } catch (err) {
         if (!mounted) {

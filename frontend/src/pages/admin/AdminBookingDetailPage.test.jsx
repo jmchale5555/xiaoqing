@@ -159,6 +159,35 @@ describe('AdminBookingDetailPage', () => {
     expect(confirmedOption).toBeDisabled()
     expect(seatedOption).toBeDisabled()
   })
+
+  test('uses booking party size when loading initial table availability', async () => {
+    mockFetchBooking.mockResolvedValueOnce({
+      booking: {
+        id: 42,
+        guest_name: 'Taylor',
+        guest_phone: '07000000000',
+        guest_email: 'taylor@example.com',
+        party_size: 6,
+        booking_start: '2026-04-10 18:00:00',
+        booking_end: '2026-04-10 19:30:00',
+        status: 'confirmed',
+        table_id: null,
+        notes: 'Near window',
+      },
+    })
+
+    renderWithRoute()
+
+    await waitFor(() => {
+      expect(mockFetchBookingAvailability).toHaveBeenCalled()
+    })
+
+    expect(mockFetchBookingAvailability).toHaveBeenCalledWith(
+      expect.objectContaining({
+        partySize: 6,
+      }),
+    )
+  })
 })
 
 function renderWithRoute() {
