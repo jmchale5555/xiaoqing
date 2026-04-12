@@ -87,15 +87,29 @@ body {
 .auth-menu-trigger {
   border: 1px solid rgba(154, 59, 59, 0.25);
   border-radius: 0.65rem;
-  min-width: 2.35rem;
-  min-height: 2.35rem;
-  padding: 0.2rem;
+  width: 2.55rem;
+  height: 2.55rem;
+  padding: 0;
   background: rgba(154, 59, 59, 0.1);
   color: var(--accent-deep);
   font: inherit;
-  font-size: 1.25rem;
-  line-height: 1;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
   cursor: pointer;
+}
+
+.auth-menu-icon {
+  width: 1.2rem;
+  display: grid;
+  gap: 0.2rem;
+}
+
+.auth-menu-icon span {
+  display: block;
+  height: 2px;
+  border-radius: 999px;
+  background: currentColor;
 }
 
 .auth-menu-dropdown {

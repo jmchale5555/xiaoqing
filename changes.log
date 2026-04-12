@@ -121,6 +121,10 @@
 - Increased hamburger trigger size for clearer visibility and touch target in navbar.
 - Removed automatic redirect after password change; page now stays in place with success feedback and explicit "Back to home" action.
 
+2026-04-12 | UX polish: hamburger icon rendering + outside-click close
+- Replaced text-based hamburger glyph with a custom 3-bar icon and fixed dimensions for consistent visible sizing.
+- Added outside-click/touch handling so the account dropdown closes when clicking away.
+
 2026-04-12 | Data: seeded initial dining table mix
 - Added migration `database/migrations/20260412_000500_seed_dining_tables.php` to seed 15 tables (7 small, 5 medium, 3 large).
 - Applied migration in dev DB and verified distribution counts: 7 (`<=2` seats), 5 (`4-5` seats), 3 (`6-10` seats).

@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import { Link, NavLink, useLocation, useNavigate } from 'react-router-dom'
 import { logout, me } from '../lib/auth'
 
@@ -9,6 +9,7 @@ export default function NavBar() {
   const location = useLocation()
   const [user, setUser] = useState(null)
   const [menuOpen, setMenuOpen] = useState(false)
+  const menuRef = useRef(null)
 
   const isAuthenticated = Boolean(user)
   const role = String(user?.role || '')
@@ -41,6 +42,26 @@ export default function NavBar() {
   useEffect(() => {
     setMenuOpen(false)
   }, [location.pathname])
+
+  useEffect(() => {
+    function onDocumentPointerDown(event) {
+      if (!menuRef.current) {
+        return
+      }
+
+      if (!menuRef.current.contains(event.target)) {
+        setMenuOpen(false)
+      }
+    }
+
+    document.addEventListener('mousedown', onDocumentPointerDown)
+    document.addEventListener('touchstart', onDocumentPointerDown)
+
+    return () => {
+      document.removeEventListener('mousedown', onDocumentPointerDown)
+      document.removeEventListener('touchstart', onDocumentPointerDown)
+    }
+  }, [])
 
   async function onLogout() {
     try {
@@ -76,7 +97,7 @@ export default function NavBar() {
               </NavLink>
             </>
           ) : null}
-          <div className="auth-menu-wrap">
+          <div className="auth-menu-wrap" ref={menuRef}>
             <button
               type="button"
               className="auth-menu-trigger"
@@ -84,7 +105,11 @@ export default function NavBar() {
               aria-expanded={menuOpen}
               onClick={() => setMenuOpen((prev) => !prev)}
             >
-              ☰
+              <span className="auth-menu-icon" aria-hidden="true">
+                <span />
+                <span />
+                <span />
+              </span>
             </button>
 
             {menuOpen ? (
