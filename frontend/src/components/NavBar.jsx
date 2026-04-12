@@ -9,6 +9,7 @@ export default function NavBar() {
   const location = useLocation()
   const [user, setUser] = useState(null)
   const [menuOpen, setMenuOpen] = useState(false)
+  const [isNarrowScreen, setIsNarrowScreen] = useState(false)
   const menuRef = useRef(null)
 
   const isAuthenticated = Boolean(user)
@@ -42,6 +43,24 @@ export default function NavBar() {
   useEffect(() => {
     setMenuOpen(false)
   }, [location.pathname])
+
+  useEffect(() => {
+    if (typeof window.matchMedia !== 'function') {
+      return undefined
+    }
+
+    const mediaQuery = window.matchMedia('(max-width: 640px)')
+    const update = () => setIsNarrowScreen(mediaQuery.matches)
+    update()
+
+    if (typeof mediaQuery.addEventListener === 'function') {
+      mediaQuery.addEventListener('change', update)
+      return () => mediaQuery.removeEventListener('change', update)
+    }
+
+    mediaQuery.addListener(update)
+    return () => mediaQuery.removeListener(update)
+  }, [])
 
   useEffect(() => {
     function onDocumentPointerDown(event) {
@@ -81,27 +100,31 @@ export default function NavBar() {
           XiaoQing Kitchen
         </Link>
         <nav className="site-nav">
-          <NavLink to="/" end className={({ isActive }) => (isActive ? active : '')}>
-            Home
-          </NavLink>
-          <NavLink to="/menu" className={({ isActive }) => (isActive ? active : '')}>
-            Menu
-          </NavLink>
-          {isStaff ? (
+          {!isNarrowScreen ? (
             <>
-              <NavLink to="/admin/menu" className={({ isActive }) => (isActive ? active : '')}>
-                Admin Menu
+              <NavLink to="/" end className={({ isActive }) => (isActive ? active : '')}>
+                Home
               </NavLink>
-              <NavLink to="/admin/bookings" className={({ isActive }) => (isActive ? active : '')}>
-                Bookings
+              <NavLink to="/menu" className={({ isActive }) => (isActive ? active : '')}>
+                Menu
               </NavLink>
+              {isStaff ? (
+                <>
+                  <NavLink to="/admin/menu" className={({ isActive }) => (isActive ? active : '')}>
+                    Admin Menu
+                  </NavLink>
+                  <NavLink to="/admin/bookings" className={({ isActive }) => (isActive ? active : '')}>
+                    Bookings
+                  </NavLink>
+                </>
+              ) : null}
             </>
           ) : null}
           <div className="auth-menu-wrap" ref={menuRef}>
             <button
               type="button"
               className="auth-menu-trigger"
-              aria-label="Open account menu"
+              aria-label={isNarrowScreen ? 'Open navigation menu' : 'Open account menu'}
               aria-expanded={menuOpen}
               onClick={() => setMenuOpen((prev) => !prev)}
             >
@@ -114,7 +137,61 @@ export default function NavBar() {
 
             {menuOpen ? (
               <div className="auth-menu-dropdown">
-                {isAuthenticated ? (
+                {isNarrowScreen ? (
+                  <>
+                    <NavLink to="/" end className={({ isActive }) => (isActive ? `auth-menu-link ${active}` : 'auth-menu-link')}>
+                      Home
+                    </NavLink>
+                    <NavLink to="/menu" className={({ isActive }) => (isActive ? `auth-menu-link ${active}` : 'auth-menu-link')}>
+                      Menu
+                    </NavLink>
+                    {isStaff ? (
+                      <>
+                        <NavLink
+                          to="/admin/menu"
+                          className={({ isActive }) => (isActive ? `auth-menu-link ${active}` : 'auth-menu-link')}
+                        >
+                          Admin Menu
+                        </NavLink>
+                        <NavLink
+                          to="/admin/bookings"
+                          className={({ isActive }) => (isActive ? `auth-menu-link ${active}` : 'auth-menu-link')}
+                        >
+                          Bookings
+                        </NavLink>
+                      </>
+                    ) : null}
+                    <div className="auth-menu-divider" aria-hidden="true" />
+                    {isAuthenticated ? (
+                      <>
+                        <NavLink
+                          to="/change-password"
+                          className={({ isActive }) => (isActive ? `auth-menu-link ${active}` : 'auth-menu-link')}
+                        >
+                          Change password
+                        </NavLink>
+                        <button type="button" className="auth-menu-link" onClick={onLogout}>
+                          Logout
+                        </button>
+                      </>
+                    ) : (
+                      <>
+                        <NavLink
+                          to="/login"
+                          className={({ isActive }) => (isActive ? `auth-menu-link ${active}` : 'auth-menu-link')}
+                        >
+                          Login
+                        </NavLink>
+                        <NavLink
+                          to="/signup"
+                          className={({ isActive }) => (isActive ? `auth-menu-link ${active}` : 'auth-menu-link')}
+                        >
+                          Sign up
+                        </NavLink>
+                      </>
+                    )}
+                  </>
+                ) : isAuthenticated ? (
                   <>
                     <NavLink to="/change-password" className={({ isActive }) => (isActive ? `auth-menu-link ${active}` : 'auth-menu-link')}>
                       Change password

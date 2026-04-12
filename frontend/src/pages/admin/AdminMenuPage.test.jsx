@@ -51,7 +51,7 @@ describe('AdminMenuPage reorder', () => {
 
     const rows = container.querySelectorAll('tbody tr')
     const secondRow = rows[1]
-    await user.click(within(secondRow).getByRole('button', { name: 'Up' }))
+    await user.click(within(secondRow).getByRole('button', { name: 'Move up' }))
 
     await user.click(screen.getByRole('button', { name: 'Save order' }))
 

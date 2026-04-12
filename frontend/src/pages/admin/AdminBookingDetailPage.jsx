@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from 'react'
+import { useEffect, useMemo, useRef, useState } from 'react'
 import { Link, useParams } from 'react-router-dom'
 import AdminGuard from '../../components/AdminGuard'
 import {
@@ -41,6 +41,7 @@ export default function AdminBookingDetailPage() {
   const [availabilityError, setAvailabilityError] = useState('')
   const [oversizedConfirm, setOversizedConfirm] = useState(null)
   const [events, setEvents] = useState([])
+  const oversizedCancelRef = useRef(null)
 
   const tableMap = useMemo(() => {
     const map = new Map()
@@ -122,6 +123,31 @@ export default function AdminBookingDetailPage() {
     const timeout = window.setTimeout(() => setAvailabilityError(''), 4000)
     return () => window.clearTimeout(timeout)
   }, [availabilityError])
+
+  useEffect(() => {
+    if (!oversizedConfirm) {
+      return
+    }
+
+    function handleKeyDown(event) {
+      if (event.key === 'Escape' && assigningTableId === null) {
+        setOversizedConfirm(null)
+      }
+    }
+
+    window.addEventListener('keydown', handleKeyDown)
+    return () => window.removeEventListener('keydown', handleKeyDown)
+  }, [oversizedConfirm, assigningTableId])
+
+  useEffect(() => {
+    if (!oversizedConfirm) {
+      return
+    }
+
+    window.setTimeout(() => {
+      oversizedCancelRef.current?.focus()
+    }, 0)
+  }, [oversizedConfirm])
 
   async function loadAvailability(sourceBooking = booking, sourceForm = form) {
     const candidate = sourceBooking || booking
@@ -431,8 +457,18 @@ export default function AdminBookingDetailPage() {
         ) : null}
 
         {oversizedConfirm ? (
-          <section className="admin-modal-backdrop" role="dialog" aria-modal="true" aria-label="Oversized table confirmation">
-            <div className="admin-modal-card">
+          <section
+            className="admin-modal-backdrop"
+            role="dialog"
+            aria-modal="true"
+            aria-label="Oversized table confirmation"
+            onMouseDown={(event) => {
+              if (event.target === event.currentTarget && assigningTableId === null) {
+                setOversizedConfirm(null)
+              }
+            }}
+          >
+            <div className="admin-modal-card" onMouseDown={(event) => event.stopPropagation()}>
               <h2>Confirm oversized table assignment</h2>
               <p>
                 {oversizedConfirm.warning?.message ||
@@ -447,7 +483,7 @@ export default function AdminBookingDetailPage() {
               </ul>
 
               <div className="admin-actions">
-                <button className="admin-btn-secondary" onClick={() => setOversizedConfirm(null)}>
+                <button className="admin-btn-secondary" onClick={() => setOversizedConfirm(null)} ref={oversizedCancelRef}>
                   Cancel
                 </button>
                 <button

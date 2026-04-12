@@ -138,6 +138,48 @@ describe('AdminBookingDetailPage', () => {
     expect(mockAssignBookingTable).toHaveBeenNthCalledWith(2, 42, 9, { confirmOversized: true })
   })
 
+  test('closes oversized confirm modal on Escape key', async () => {
+    const user = userEvent.setup()
+
+    const oversizedError = new Error('Validation failed')
+    oversizedError.status = 422
+    oversizedError.payload = {
+      message: 'Validation failed',
+      errors: {
+        confirm_oversized: 'Set confirm_oversized=true to assign an oversized table',
+      },
+      warning: {
+        code: 'oversized_table_confirmation_required',
+        table_name: 'Patio 9',
+        party_size: 2,
+        seats: 8,
+        extra_seats: 6,
+      },
+    }
+
+    mockAssignBookingTable.mockRejectedValueOnce(oversizedError)
+
+    renderWithRoute()
+
+    await waitFor(() => {
+      expect(screen.getByText('Alternative larger tables')).toBeInTheDocument()
+    })
+
+    const optionCard = screen.getByText('Patio 9').closest('article')
+    expect(optionCard).toBeTruthy()
+    await user.click(within(optionCard).getByRole('button', { name: /Assign/ }))
+
+    await waitFor(() => {
+      expect(screen.getByRole('dialog', { name: 'Oversized table confirmation' })).toBeInTheDocument()
+    })
+
+    await user.keyboard('{Escape}')
+
+    await waitFor(() => {
+      expect(screen.queryByRole('dialog', { name: 'Oversized table confirmation' })).not.toBeInTheDocument()
+    })
+  })
+
   test('disables invalid status transitions for terminal booking states', async () => {
     mockFetchBooking.mockResolvedValueOnce({
       booking: {

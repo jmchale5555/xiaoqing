@@ -217,4 +217,35 @@ describe('AdminBookingsPage oversized assignment flow', () => {
     expect(mockCreateBooking).not.toHaveBeenCalled()
     expect(screen.getByText('Booking end must be after booking start.')).toBeInTheDocument()
   })
+
+  test('closes create modal on Escape key', async () => {
+    const user = userEvent.setup()
+
+    mockFetchBookings.mockResolvedValue({ bookings: [] })
+    mockFetchTables.mockResolvedValue({
+      tables: [{ id: 7, name: 'Main 7', seats: 4, is_active: true }],
+    })
+
+    render(
+      <MemoryRouter>
+        <AdminBookingsPage />
+      </MemoryRouter>,
+    )
+
+    await waitFor(() => {
+      expect(screen.getByRole('button', { name: 'New booking' })).toBeInTheDocument()
+    })
+
+    await user.click(screen.getByRole('button', { name: 'New booking' }))
+
+    await waitFor(() => {
+      expect(screen.getByRole('dialog', { name: 'New booking modal' })).toBeInTheDocument()
+    })
+
+    await user.keyboard('{Escape}')
+
+    await waitFor(() => {
+      expect(screen.queryByRole('dialog', { name: 'New booking modal' })).not.toBeInTheDocument()
+    })
+  })
 })

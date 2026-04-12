@@ -132,3 +132,67 @@
 2026-04-12 | Data: normalized table names by type
 - Added migration `database/migrations/20260412_000510_normalize_table_type_names.php` to rename seeded tables to `Small Table XX`, `Medium Table XX`, and `Large Table XX`.
 - Standardized seats per type to reduce confusion: small=2, medium=4, large=8.
+
+2026-04-12 | Frontend mobile + keyboard usability: admin bookings surfaces
+- Improved bookings board mobile usability with intentional horizontal table scrolling, larger touch targets, and stronger focus-visible states for keyboard navigation.
+- Added keyboard-accessible booking row selection (`tabIndex` + Enter/Space) and prevented action-button clicks from triggering row-selection side effects.
+- Added modal usability improvements on booking board/detail: autofocus on open, Escape-to-close, and backdrop click-to-close where operations are not in-flight.
+
+2026-04-12 | Frontend responsive UX: admin menu mobile actions and condensed columns
+- Updated `AdminMenuPage` actions to icon + label controls and grouped visibility/edit/delete together in the Actions column for consistent mobile use.
+- Added responsive behavior to hide `Up`/`Down` reorder buttons plus `Category` and `Price` columns on narrow screens while keeping full details accessible via edit view.
+- Added mobile stacking/sizing styles for action controls and updated the admin menu reorder test for accessible move-button labels.
+
+2026-04-12 | Frontend responsive polish: tighter menu dish column wrapping on mobile
+- Added a dedicated `menu-table` class and mobile table layout rules to narrow the dish column while preserving readability.
+- Enabled stronger dish-name/description wrapping (`overflow-wrap` + `word-break`) and reduced dish thumbnail size on small screens.
+- Keeps long dish titles/descriptions usable without forcing extra horizontal scrolling.
+
+2026-04-12 | Frontend responsive UX: hide menu status column + drag-to-scroll table on mobile
+- Hid the menu Status column on narrow screens since the visibility action button already communicates current state.
+- Added mobile drag-to-scroll behavior on the menu table wrapper so users can swipe/drag horizontally from table content, not just the scrollbar.
+- Disabled row drag-reorder on narrow screens to avoid conflicts with horizontal drag-scrolling interactions.
+
+2026-04-12 | Frontend responsive polish: extra-compact mobile order column in menu table
+- Added a dedicated `menu-col-order` header class and hid the `Order` header label on narrow screens.
+- Reduced mobile width/padding of the order column so the drag handle occupies minimal space.
+- Preserved desktop labeling and reorder behavior while maximizing space for dish/action content on phones.
+
+2026-04-12 | Frontend responsive refinement: aggressively compact mobile order column
+- Tightened mobile order column width constraints to 24px (min/max locked) and reduced cell side padding.
+- Centered order-cell content and removed extra control gap so only the drag handle consumes space.
+- Shrunk drag-handle footprint for mobile while keeping it clickable and visible.
+
+2026-04-12 | Frontend responsive tweak: compact mobile menu action buttons
+- Reduced mobile actions-column footprint and switched stacked buttons from full-width stretch to compact left-aligned sizing.
+- Added tighter width caps, padding, and font sizing for `Visible`, `Edit`, and `Delete` buttons on narrow screens.
+- Keeps icon+label readability while reclaiming horizontal space for dish content.
+
+2026-04-12 | Frontend responsive fix: remove excess mobile menu right overflow + button spacing
+- Reduced mobile menu table minimum width and made the actions column content-sized to eliminate extra blank scroll area on the right.
+- Scoped zero-gap order-control compaction to the order cell only (`menu-order-controls`) so action buttons are no longer stuck together.
+- Added explicit vertical gap for stacked mobile action buttons.
+
+2026-04-12 | Frontend responsive rebalance: mobile menu order/actions column sizing
+- Rebalanced mobile menu table layout from rigid fixed widths to a tighter auto layout to prevent oversized order-column behavior.
+- Kept order and actions columns constrained with nowrap behavior while returning right-cell padding for cleaner visual spacing.
+- Increased stacked action-button vertical spacing slightly and retained compact button sizing.
+
+2026-04-12 | Frontend mobile interaction fix: restore menu drag-reorder with swipe scrolling
+- Re-enabled row `draggable` behavior on narrow screens (it had been disabled during swipe-scroll rollout).
+- Updated table swipe-drag guard to skip drag-handle/order-control touches so reorder gestures are not intercepted by horizontal scrolling.
+- Added `touch-action: none` to the mobile drag handle to improve pointer behavior during reorder gestures.
+
+2026-04-12 | Frontend mobile fix: custom touch drag reorder for menu rows
+- Added handle-based pointer reorder logic for narrow screens using `elementFromPoint` row detection and drop-target highlighting.
+- Kept native HTML5 drag/drop for wider screens while using touch-friendly pointer drag on mobile.
+- Preserved horizontal swipe-scroll for table content, with drag-handle touches now dedicated to reorder.
+
+2026-04-12 | Frontend UX hint: mobile menu reorder discoverability
+- Added a mobile-only helper line on Admin Menu: "Tip (mobile): drag the :: handle to reorder rows."
+- Kept the existing desktop tip unchanged while showing the new hint only at narrow-screen breakpoints.
+
+2026-04-12 | Frontend responsive nav: mobile hamburger now contains full navigation
+- Updated `NavBar` so narrow screens collapse all primary links (Home/Menu/Admin links) into the existing hamburger dropdown.
+- Kept widescreen navigation behavior unchanged while expanding mobile dropdown content to include both navigation and account actions.
+- Added a dropdown divider and mobile dropdown width polish for clearer grouping and touch usability.

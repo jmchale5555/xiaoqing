@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from 'react'
+import { useEffect, useMemo, useRef, useState } from 'react'
 import { Link } from 'react-router-dom'
 import AdminGuard from '../../components/AdminGuard'
 import { assignBookingTable, createBooking, fetchBookingAvailability, fetchBookings } from '../../lib/bookings'
@@ -40,6 +40,9 @@ export default function AdminBookingsPage() {
   const [createError, setCreateError] = useState('')
   const [creating, setCreating] = useState(false)
   const [createOversizedConfirm, setCreateOversizedConfirm] = useState(null)
+  const createGuestInputRef = useRef(null)
+  const oversizedCancelRef = useRef(null)
+  const createOversizedCancelRef = useRef(null)
 
   const tableMap = useMemo(() => {
     const map = new Map()
@@ -127,6 +130,69 @@ export default function AdminBookingsPage() {
     const timeout = window.setTimeout(() => setAvailabilityError(''), 4000)
     return () => window.clearTimeout(timeout)
   }, [availabilityError])
+
+  useEffect(() => {
+    if (!oversizedConfirm && !showCreateModal && !createOversizedConfirm) {
+      return
+    }
+
+    function handleKeyDown(event) {
+      if (event.key !== 'Escape') {
+        return
+      }
+
+      if (createOversizedConfirm) {
+        if (!creating) {
+          setCreateOversizedConfirm(null)
+        }
+        return
+      }
+
+      if (showCreateModal) {
+        if (!creating) {
+          closeCreateModal()
+        }
+        return
+      }
+
+      if (oversizedConfirm && assigningTableId === null) {
+        setOversizedConfirm(null)
+      }
+    }
+
+    window.addEventListener('keydown', handleKeyDown)
+    return () => window.removeEventListener('keydown', handleKeyDown)
+  }, [oversizedConfirm, showCreateModal, createOversizedConfirm, creating, assigningTableId])
+
+  useEffect(() => {
+    if (!showCreateModal || createOversizedConfirm) {
+      return
+    }
+
+    window.setTimeout(() => {
+      createGuestInputRef.current?.focus()
+    }, 0)
+  }, [showCreateModal, createOversizedConfirm])
+
+  useEffect(() => {
+    if (!oversizedConfirm) {
+      return
+    }
+
+    window.setTimeout(() => {
+      oversizedCancelRef.current?.focus()
+    }, 0)
+  }, [oversizedConfirm])
+
+  useEffect(() => {
+    if (!createOversizedConfirm) {
+      return
+    }
+
+    window.setTimeout(() => {
+      createOversizedCancelRef.current?.focus()
+    }, 0)
+  }, [createOversizedConfirm])
 
   useEffect(() => {
     if (loading) {
@@ -376,6 +442,13 @@ export default function AdminBookingsPage() {
                         key={booking.id}
                         className={booking.id === selectedBookingId ? 'booking-row-active booking-row-clickable' : 'booking-row-clickable'}
                         onClick={() => selectBookingForAssignment(booking)}
+                        tabIndex={0}
+                        onKeyDown={(event) => {
+                          if (event.key === 'Enter' || event.key === ' ') {
+                            event.preventDefault()
+                            void selectBookingForAssignment(booking)
+                          }
+                        }}
                       >
                         <td>
                           <strong>{booking.guest_name}</strong>
@@ -394,12 +467,19 @@ export default function AdminBookingsPage() {
                           <div className="admin-order-controls booking-actions-col">
                             <button
                               className="admin-mini-btn"
-                              onClick={() => selectBookingForAssignment(booking)}
+                              onClick={(event) => {
+                                event.stopPropagation()
+                                void selectBookingForAssignment(booking)
+                              }}
                               disabled={assigningTableId !== null}
                             >
                               Assign table
                             </button>
-                            <Link className="admin-mini-btn" to={`/admin/bookings/${booking.id}`}>
+                            <Link
+                              className="admin-mini-btn"
+                              to={`/admin/bookings/${booking.id}`}
+                              onClick={(event) => event.stopPropagation()}
+                            >
                               Amend
                             </Link>
                           </div>
@@ -452,8 +532,18 @@ export default function AdminBookingsPage() {
         ) : null}
 
         {oversizedConfirm ? (
-          <section className="admin-modal-backdrop" role="dialog" aria-modal="true" aria-label="Oversized table confirmation">
-            <div className="admin-modal-card">
+          <section
+            className="admin-modal-backdrop"
+            role="dialog"
+            aria-modal="true"
+            aria-label="Oversized table confirmation"
+            onMouseDown={(event) => {
+              if (event.target === event.currentTarget && assigningTableId === null) {
+                setOversizedConfirm(null)
+              }
+            }}
+          >
+            <div className="admin-modal-card" onMouseDown={(event) => event.stopPropagation()}>
               <h2>Confirm oversized table assignment</h2>
               <p>
                 {oversizedConfirm.warning?.message ||
@@ -468,7 +558,7 @@ export default function AdminBookingsPage() {
               </ul>
 
               <div className="admin-actions">
-                <button className="admin-btn-secondary" onClick={() => setOversizedConfirm(null)}>
+                <button className="admin-btn-secondary" onClick={() => setOversizedConfirm(null)} ref={oversizedCancelRef}>
                   Cancel
                 </button>
                 <button
@@ -484,8 +574,18 @@ export default function AdminBookingsPage() {
         ) : null}
 
         {showCreateModal ? (
-          <section className="admin-modal-backdrop" role="dialog" aria-modal="true" aria-label="New booking modal">
-            <div className="admin-modal-card">
+          <section
+            className="admin-modal-backdrop"
+            role="dialog"
+            aria-modal="true"
+            aria-label="New booking modal"
+            onMouseDown={(event) => {
+              if (event.target === event.currentTarget && !creating) {
+                closeCreateModal()
+              }
+            }}
+          >
+            <div className="admin-modal-card" onMouseDown={(event) => event.stopPropagation()}>
               <h2>New booking</h2>
 
               {createError ? <p className="admin-error">{createError}</p> : null}
@@ -495,6 +595,7 @@ export default function AdminBookingsPage() {
                   <label>
                     <span>Guest name</span>
                     <input
+                      ref={createGuestInputRef}
                       required
                       value={createForm.guest_name}
                       onChange={(event) => setCreateForm((prev) => ({ ...prev, guest_name: event.target.value }))}
@@ -602,8 +703,18 @@ export default function AdminBookingsPage() {
         ) : null}
 
         {createOversizedConfirm ? (
-          <section className="admin-modal-backdrop" role="dialog" aria-modal="true" aria-label="Confirm oversized create assignment">
-            <div className="admin-modal-card">
+          <section
+            className="admin-modal-backdrop"
+            role="dialog"
+            aria-modal="true"
+            aria-label="Confirm oversized create assignment"
+            onMouseDown={(event) => {
+              if (event.target === event.currentTarget && !creating) {
+                setCreateOversizedConfirm(null)
+              }
+            }}
+          >
+            <div className="admin-modal-card" onMouseDown={(event) => event.stopPropagation()}>
               <h2>Confirm oversized table assignment</h2>
               <p>
                 {createOversizedConfirm.warning?.message ||
@@ -616,7 +727,12 @@ export default function AdminBookingsPage() {
                 <li>Extra seats: {createOversizedConfirm.warning?.extra_seats ?? '-'}</li>
               </ul>
               <div className="admin-actions">
-                <button className="admin-btn-secondary" onClick={() => setCreateOversizedConfirm(null)} disabled={creating}>
+                <button
+                  className="admin-btn-secondary"
+                  onClick={() => setCreateOversizedConfirm(null)}
+                  disabled={creating}
+                  ref={createOversizedCancelRef}
+                >
                   Cancel
                 </button>
                 <button className="admin-cta" onClick={() => submitCreateBooking(true)} disabled={creating}>
