@@ -324,6 +324,14 @@ class BookingsController extends ApiController
             return;
         }
 
+        if (!$this->isAllowedStatusTransition((string)$existing->status, Booking::STATUS_CANCELLED))
+        {
+            $this->validationError([
+                'status' => 'Invalid status transition from ' . (string)$existing->status . ' to ' . Booking::STATUS_CANCELLED,
+            ]);
+            return;
+        }
+
         try
         {
             $booking->update($bookingId, ['status' => Booking::STATUS_CANCELLED]);
@@ -741,6 +749,10 @@ class BookingsController extends ApiController
             {
                 $errors['status'] = 'Invalid booking status';
             }
+            elseif (!$this->isAllowedStatusTransition((string)$existing->status, $status))
+            {
+                $errors['status'] = 'Invalid status transition from ' . (string)$existing->status . ' to ' . $status;
+            }
             else
             {
                 $data['status'] = $status;
@@ -808,7 +820,10 @@ class BookingsController extends ApiController
 
         if (empty($table->is_active))
         {
-            return ['table_id' => 'Table is not active'];
+            return [
+                'errors' => ['table_id' => 'Table is not active'],
+                'warning' => null,
+            ];
         }
 
         if ((int)($table->seats ?? 0) < $partySize)
@@ -911,6 +926,39 @@ class BookingsController extends ApiController
             Booking::STATUS_CONFIRMED,
             Booking::STATUS_SEATED,
         ], true);
+    }
+
+    private function isAllowedStatusTransition(string $fromStatus, string $toStatus): bool
+    {
+        if ($fromStatus === $toStatus)
+        {
+            return true;
+        }
+
+        $allowedTransitions = [
+            Booking::STATUS_PENDING => [
+                Booking::STATUS_CONFIRMED,
+                Booking::STATUS_SEATED,
+                Booking::STATUS_CANCELLED,
+                Booking::STATUS_NO_SHOW,
+            ],
+            Booking::STATUS_CONFIRMED => [
+                Booking::STATUS_SEATED,
+                Booking::STATUS_CANCELLED,
+                Booking::STATUS_NO_SHOW,
+            ],
+            Booking::STATUS_SEATED => [
+                Booking::STATUS_COMPLETED,
+                Booking::STATUS_CANCELLED,
+            ],
+            Booking::STATUS_COMPLETED => [],
+            Booking::STATUS_CANCELLED => [],
+            Booking::STATUS_NO_SHOW => [],
+        ];
+
+        $allowed = $allowedTransitions[$fromStatus] ?? [];
+
+        return in_array($toStatus, $allowed, true);
     }
 
     private function normalizeDateTime(mixed $value): ?string

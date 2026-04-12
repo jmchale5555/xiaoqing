@@ -12,6 +12,15 @@ import { fetchTables } from '../../lib/tables'
 
 const STATUS_OPTIONS = ['pending', 'confirmed', 'seated', 'completed', 'cancelled', 'no_show']
 
+const STATUS_TRANSITIONS = {
+  pending: ['pending', 'confirmed', 'seated', 'cancelled', 'no_show'],
+  confirmed: ['confirmed', 'seated', 'cancelled', 'no_show'],
+  seated: ['seated', 'completed', 'cancelled'],
+  completed: ['completed'],
+  cancelled: ['cancelled'],
+  no_show: ['no_show'],
+}
+
 export default function AdminBookingDetailPage() {
   const { id } = useParams()
   const [booking, setBooking] = useState(null)
@@ -36,6 +45,11 @@ export default function AdminBookingDetailPage() {
     tables.forEach((table) => map.set(table.id, table))
     return map
   }, [tables])
+
+  const allowedStatuses = useMemo(() => {
+    const currentStatus = booking?.status || 'pending'
+    return new Set(STATUS_TRANSITIONS[currentStatus] || [currentStatus])
+  }, [booking?.status])
 
   useEffect(() => {
     let mounted = true
@@ -301,13 +315,17 @@ export default function AdminBookingDetailPage() {
                     <span>Status</span>
                     <select value={form.status} onChange={(event) => setForm((prev) => ({ ...prev, status: event.target.value }))}>
                       {STATUS_OPTIONS.map((status) => (
-                        <option key={status} value={status}>
+                        <option key={status} value={status} disabled={!allowedStatuses.has(status)}>
                           {status}
                         </option>
                       ))}
                     </select>
                   </label>
                 </div>
+
+                <p className="admin-muted">
+                  Allowed transitions from <strong>{booking.status}</strong> are enabled; terminal states stay locked.
+                </p>
 
                 <label>
                   <span>Notes</span>

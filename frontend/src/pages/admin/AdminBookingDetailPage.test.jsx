@@ -127,6 +127,38 @@ describe('AdminBookingDetailPage', () => {
     expect(mockAssignBookingTable).toHaveBeenNthCalledWith(1, 42, 9, { confirmOversized: false })
     expect(mockAssignBookingTable).toHaveBeenNthCalledWith(2, 42, 9, { confirmOversized: true })
   })
+
+  test('disables invalid status transitions for terminal booking states', async () => {
+    mockFetchBooking.mockResolvedValueOnce({
+      booking: {
+        id: 42,
+        guest_name: 'Taylor',
+        guest_phone: '07000000000',
+        guest_email: 'taylor@example.com',
+        party_size: 2,
+        booking_start: '2026-04-10 18:00:00',
+        booking_end: '2026-04-10 19:30:00',
+        status: 'cancelled',
+        table_id: null,
+        notes: 'Near window',
+      },
+    })
+
+    renderWithRoute()
+
+    await waitFor(() => {
+      expect(screen.getByDisplayValue('cancelled')).toBeInTheDocument()
+    })
+
+    const statusSelect = screen.getByLabelText('Status')
+    const cancelledOption = within(statusSelect).getByRole('option', { name: 'cancelled' })
+    const confirmedOption = within(statusSelect).getByRole('option', { name: 'confirmed' })
+    const seatedOption = within(statusSelect).getByRole('option', { name: 'seated' })
+
+    expect(cancelledOption).not.toBeDisabled()
+    expect(confirmedOption).toBeDisabled()
+    expect(seatedOption).toBeDisabled()
+  })
 })
 
 function renderWithRoute() {

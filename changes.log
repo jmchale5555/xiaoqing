@@ -1,0 +1,36 @@
+2026-04-12 | Backend: oversized assignment warning + override contract
+- Added oversized-table warning threshold (4+ extra seats) in booking assignment validation.
+- Required `confirm_oversized=true` for oversized table assignment/create/update flows.
+- Added structured warning payload and availability response buckets: `recommended_tables` and `larger_tables`.
+
+2026-04-12 | Tests: booking oversized contract coverage
+- Expanded `tests/Feature/BookingsApiTest.php` for oversized-warning rejection and confirmed override success.
+- Added availability response assertions for recommendation buckets and warning threshold metadata.
+
+2026-04-12 | Frontend: admin bookings board
+- Added `frontend/src/pages/admin/AdminBookingsPage.jsx` with status/date filters, assignment assist, and oversized confirmation modal.
+- Added API wrappers `frontend/src/lib/bookings.js` and `frontend/src/lib/tables.js`.
+- Wired `/admin/bookings` route and navigation entry.
+
+2026-04-12 | Frontend: admin booking detail page
+- Added `frontend/src/pages/admin/AdminBookingDetailPage.jsx` for editing booking fields, status, notes, cancel action, and assignment assist.
+- Added route `/admin/bookings/:id` and "Details" links from bookings board.
+- Added frontend tests in `frontend/src/pages/admin/AdminBookingDetailPage.test.jsx`.
+
+2026-04-12 | UI/API alignment: status transition guards
+- Added client-side status transition guard in booking detail status selector.
+- Mirrored transition rules in backend validation (`BookingsController`) for update/cancel endpoints.
+- Added feature tests for invalid transition rejection and terminal-state cancel rejection.
+
+2026-04-12 | Docs: status transitions + changelog workflow
+- Added a README status-transition reference for staff/dev with explicit allowed/terminal booking state changes.
+- Added AGENTS guidance to keep `changes.log` append-only and updated after each completed implementation task.
+
+2026-04-12 | Frontend: booking creation modal on admin board
+- Added inline "New booking" modal to `AdminBookingsPage` with staff fields for guest, party size, timing, status, optional table, and notes.
+- Added create flow in `frontend/src/lib/bookings.js` (`createBooking`) and board refresh/auto-select after successful creation.
+- Added oversized confirmation retry path for create requests and Vitest coverage for create modal flow.
+
+2026-04-12 | Frontend: create modal time-range guard
+- Added client-side validation in `AdminBookingsPage` to block submission when booking end is not after booking start.
+- Added Vitest coverage for invalid time-range submission in `frontend/src/pages/admin/AdminBookingsPage.test.jsx`.

@@ -192,6 +192,40 @@ class BookingsApiTest extends TestCase
         $this->assertSame($largeTableId, (int)($withConfirm['json']['booking']['table_id'] ?? 0));
     }
 
+    public function testUpdateRejectsInvalidStatusTransition(): void
+    {
+        $bookingId = $this->createBooking('Transition Guest', 2, '2026-03-28 18:00:00', '2026-03-28 19:00:00');
+
+        $token = $this->staff->csrfToken();
+        $response = $this->staff->post('/api/bookings/update/' . $bookingId, [
+            'status' => 'completed',
+        ], ['X-CSRF-Token' => $token]);
+
+        $this->assertSame(422, $response['status']);
+        $this->assertArrayHasKey('status', $response['json']['errors'] ?? []);
+    }
+
+    public function testCancelRejectsTerminalStatusTransition(): void
+    {
+        $token = $this->staff->csrfToken();
+        $create = $this->staff->post('/api/bookings/create', [
+            'guest_name' => 'Terminal Guest',
+            'party_size' => 2,
+            'booking_start' => '2026-03-28 20:00:00',
+            'booking_end' => '2026-03-28 21:00:00',
+            'status' => 'completed',
+        ], ['X-CSRF-Token' => $token]);
+
+        $this->assertSame(201, $create['status']);
+        $bookingId = (int)($create['json']['booking']['id'] ?? 0);
+
+        $cancelToken = $this->staff->csrfToken();
+        $cancel = $this->staff->post('/api/bookings/cancel/' . $bookingId, [], ['X-CSRF-Token' => $cancelToken]);
+
+        $this->assertSame(422, $cancel['status']);
+        $this->assertArrayHasKey('status', $cancel['json']['errors'] ?? []);
+    }
+
     public function testAvailabilityReturnsOnlyFreeSuitableTables(): void
     {
         $smallId = $this->createTable('Small', 2);

@@ -62,6 +62,10 @@ export async function fetchBookings(params = {}) {
   return api(path, { method: 'GET' })
 }
 
+export function createBooking(payload) {
+  return withCsrf('/api/bookings/create', payload)
+}
+
 export function fetchBooking(id) {
   return api(`/api/bookings/show/${id}`, { method: 'GET' })
 }

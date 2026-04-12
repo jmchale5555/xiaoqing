@@ -287,6 +287,14 @@ curl -s http://localhost:8080/api/posts
 curl -s http://localhost:8080/api/posts/show/1
 ```
 
+## 11) Change Log Workflow
+
+- Maintain `changes.log` at repo root as append-only.
+- After each completed implementation task, add a dated entry with:
+  - short title line (`YYYY-MM-DD | Area: change summary`)
+  - 1-3 bullets covering the key code/test/docs changes.
+- Do not rewrite or reorder older entries; only append.
+
 ---
 
 When architecture or tooling changes, update this file first so future agents execute the correct commands and follow current conventions.
