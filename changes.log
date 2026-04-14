@@ -192,7 +192,16 @@
 - Added a mobile-only helper line on Admin Menu: "Tip (mobile): drag the :: handle to reorder rows."
 - Kept the existing desktop tip unchanged while showing the new hint only at narrow-screen breakpoints.
 
+2026-04-12 | Docs: expanded README with Docker quickstart and app capabilities
+- Rewrote `README.md` to provide a complete project overview, feature summary, and architecture snapshot.
+- Added step-by-step Docker onboarding (env setup, compose up, container installs, migrations, optional seed, and URLs).
+- Documented day-to-day commands, test commands, security/API notes, and booking transition rules for staff/dev reference.
+
 2026-04-12 | Frontend responsive nav: mobile hamburger now contains full navigation
 - Updated `NavBar` so narrow screens collapse all primary links (Home/Menu/Admin links) into the existing hamburger dropdown.
 - Kept widescreen navigation behavior unchanged while expanding mobile dropdown content to include both navigation and account actions.
 - Added a dropdown divider and mobile dropdown width polish for clearer grouping and touch usability.
+
+2026-04-12 | Docs: README screenshot placeholders for project presentation
+- Added a new README section with suggested screenshot file paths under `docs/images/`.
+- Included a copy/paste Markdown template for Public Menu, Admin Menu, Bookings Board, Booking Detail, and Mobile Admin views.
